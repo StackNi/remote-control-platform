@@ -1,0 +1,110 @@
+inherited mainform_iPad: Tmainform_iPad
+  ClientHeight = 1024
+  ClientWidth = 768
+  Padding.Top = 2.000000000000000000
+  DesignerMasterStyle = 0
+  inherited Layout: TLayout
+    inherited appicon: TImage
+      MultiResBitmap.Height = 128
+      MultiResBitmap.Width = 128
+    end
+    inherited sendlayout: TLayout
+      inherited sendScrollBox: TVertScrollBox
+        Viewport.Width = 744.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited msgdurationtext: TEdit
+          inherited msgdurationspinbtn: TSpinEditButton
+            Size.Height = 50.000000000000000000
+          end
+        end
+      end
+    end
+    inherited sidebar: TLayout
+      inherited homebtn: TSkSvg
+        Svg.GrayScale = True
+        Svg.OverrideColor = claWhitesmoke
+      end
+    end
+    inherited endlayout: TLayout
+      inherited endScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited cmdlayout: TLayout
+      inherited cmdScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited cmdtext: TEdit
+          TextSettings.Font.StyleExt = {00040000000000000002000000}
+        end
+      end
+    end
+    inherited homelayout: TLayout
+      inherited homelocalIPbtn: TCircle [5]
+      end
+      inherited homedonatebtn: TCircle [6]
+      end
+      inherited homelocalIPimage: TSkSvg [7]
+      end
+      inherited homedonateimage: TSkSvg [8]
+      end
+      inherited homelocalIPlabel: TLabel [9]
+      end
+      inherited version: TLabel [11]
+      end
+      inherited homelistpopupparent: TLayout [12]
+      end
+      inherited homelistpopup: TPopup [13]
+      end
+      inherited homegithublabel: TLabel [14]
+      end
+      inherited homegithubbtn: TCircle [16]
+      end
+    end
+    inherited mobilelayout: TLayout
+      inherited mobileScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited settingslayout: TLayout
+      inherited settingsScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited localIPlayout: TLayout
+      inherited localIPScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 444.000000000000000000
+      end
+    end
+    inherited donatelayout: TLayout
+      inherited donateScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited changeusernamelayout: TLayout
+      inherited changeusernameScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited changeIPlistlayout: TLayout
+      inherited changeIPlistScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited addIPtipbtn: TButton
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+        end
+      end
+    end
+    inherited appcard: TPopup
+      inherited appname: TLabel
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+      end
+    end
+  end
+end

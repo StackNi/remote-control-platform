@@ -4,60 +4,210 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>远程控制平台 · StackNi</title>
+    
+    <!-- 网页图标 -->
+    <link rel="icon" type="image/svg+xml" href="/remote-control-platform/send.svg">
+    <link rel="alternate icon" href="/remote-control-platform/favicon.ico">
+    
+    <!-- 主题脚本 -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <style>
+        /* ===== 主题变量 ===== */
+        :root[data-theme="dark"] {
+            --bg: #0a0c10;
+            --bg-card: #111316;
+            --text: #e1e6f0;
+            --text-secondary: #8b95a1;
+            --border: #22262b;
+            --border-light: #2a2e35;
+        }
+        
+        :root[data-theme="light"] {
+            --bg: #f5f7fa;
+            --bg-card: #ffffff;
+            --text: #1a1e24;
+            --text-secondary: #4b5563;
+            --border: #e2e8f0;
+            --border-light: #d1d5db;
+        }
+        
+        /* ===== 品牌色（仅用于logo容器）===== */
+        :root {
+            --purple: #9333ea;
+            --red: #ef4444;
+            --blue: #2563eb;
+            --purple-bg: rgba(147, 51, 234, 0.1);
+            --red-bg: rgba(239, 68, 68, 0.1);
+            --blue-bg: rgba(37, 99, 235, 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
         }
         
         body {
-            background: #0a0c10;
-            color: #e1e6f0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            line-height: 1.5;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 40px 24px;
         }
         
-        /* 头部 */
+        /* ===== 导航栏 ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .site-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .site-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* 主题切换 */
+        .theme-toggle {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+        }
+        
+        .theme-btn {
+            padding: 6px 16px;
+            border-radius: 32px;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .theme-btn.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        /* ===== 头部信息 ===== */
         .header {
             margin-bottom: 48px;
         }
         
         .title {
-            font-size: 32px;
-            font-weight: 600;
-            margin-bottom: 8px;
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
         }
         
         .badge {
-            color: #8b95a1;
-            font-size: 14px;
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
         }
         
-        /* 卡片 */
+        /* ===== 三logo展示 ===== */
+        .logo-showcase {
+            display: flex;
+            justify-content: flex-start;
+            gap: 32px;
+            margin: 48px 0 56px;
+        }
+        
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 12px;
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .logo-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* 品牌色文字 */
+        .purple { color: var(--purple); }
+        .red { color: var(--red); }
+        .blue { color: var(--blue); }
+        
+        /* ===== 卡片 ===== */
         .card {
-            background: #111316;
-            border: 1px solid #22262b;
-            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             padding: 32px;
             margin-bottom: 24px;
         }
         
         .card h2 {
             font-size: 20px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text);
         }
         
-        /* 下载按钮区域 */
-        .download-row {
+        /* ===== 下载区域 ===== */
+        .download-section {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
@@ -71,121 +221,273 @@
             text-decoration: none;
             font-size: 15px;
             font-weight: 500;
+            transition: transform 0.1s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
         }
         
         .btn-primary {
-            background: #ffffff;
-            color: #0a0c10;
+            background: var(--text);
+            color: var(--bg);
         }
         
         .btn-secondary {
             background: transparent;
-            color: #e1e6f0;
-            border: 1px solid #33373e;
+            color: var(--text);
+            border: 1px solid var(--border-light);
         }
         
         .btn-secondary:hover {
-            background: #1a1d23;
+            background: var(--bg-card);
+            border-color: var(--text-secondary);
         }
         
-        /* 功能列表 */
-        .feature-list {
-            list-style: none;
-        }
-        
-        .feature-list li {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            color: #cbd5e1;
-        }
-        
-        .feature-list li:before {
-            content: "→";
-            color: #4b5563;
-            font-weight: 400;
-        }
-        
-        /* 版本号 */
-        .version {
-            color: #6b7280;
-            font-size: 13px;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid #22262b;
-        }
-        
-        /* 作者区域 */
-        .author {
-            text-align: center;
-            color: #8b95a1;
+        .install-note {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
             font-size: 14px;
-            margin-top: 48px;
-            padding-top: 24px;
-            border-top: 1px solid #22262b;
         }
         
-        .author a {
-            color: #e1e6f0;
+        /* ===== 功能列表 ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-item {
+            padding: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        
+        .feature-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        
+        .feature-item p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* ===== 作者区 ===== */
+        .author-section {
+            margin-top: 60px;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+        }
+        
+        .author-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .author-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .author-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+        }
+        
+        .author-links a {
+            color: var(--text);
             text-decoration: none;
+            font-size: 14px;
         }
         
-        .author a:hover {
+        .author-links a:hover {
             text-decoration: underline;
+        }
+        
+        /* ===== 页脚 ===== */
+        footer {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- 导航栏 -->
+        <div class="navbar">
+            <div class="logo-area">
+                <img src="/remote-control-platform/send.svg" alt="Remote Control" class="site-icon" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft=0;">
+                <span class="site-title">远程控制平台</span>
+            </div>
+            
+            <!-- 主题切换 -->
+            <div class="theme-toggle">
+                <button class="theme-btn" data-theme="dark">暗黑</button>
+                <button class="theme-btn" data-theme="light">明亮</button>
+            </div>
+        </div>
+        
         <!-- 头部 -->
         <div class="header">
-            <div class="title">远程控制平台</div>
-            <div class="badge">v3.1.27.5 · 高二学生作品</div>
+            <span class="badge">v3.1.27.5 · 高二学生作品</span>
+            <h1 class="title">局域网通信控制工具</h1>
+            <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息的需求</p>
         </div>
         
-        <!-- 主卡片：下载 -->
+        <!-- 三色Logo展示区（已上传，正常显示） -->
+        <div class="logo-showcase">
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-purple.png" alt="手机发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--purple-bg)';">
+                </div>
+                <span class="logo-label purple">📱 手机发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-red.png" alt="电脑发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--red-bg)';">
+                </div>
+                <span class="logo-label red">💻 电脑发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-blue.png" alt="Windows接收端" onerror="this.style.display='none'; this.parentElement.style.background='var(--blue-bg)';">
+                </div>
+                <span class="logo-label blue">🖥️ Windows接收端</span>
+            </div>
+        </div>
+        
+        <!-- 下载卡片 -->
         <div class="card">
-            <h2>下载安装包</h2>
-            <div class="download-row">
-                <a href="https://github.com/StackNi/remote-control-platform/releases" class="btn btn-primary">Windows 版 (发送端+接收端)</a>
+            <h2>📦 下载</h2>
+            <div class="download-section">
+                <a href="https://github.com/StackNi/remote-control-platform/releases" class="btn btn-primary">Windows 版安装包</a>
                 <a href="https://github.com/StackNi/remote-control-platform/releases" class="btn btn-secondary">Android 版</a>
             </div>
-            <div class="version">
-                包含：FMX发送端 · WPF接收端 · Windows服务
+            <div class="install-note">
+                Windows安装包包含：FMX发送端 + WPF接收端 + Windows服务
             </div>
         </div>
         
-        <!-- 卡片：功能 -->
+        <!-- 功能卡片 -->
         <div class="card">
-            <h2>v3.1.27.5 功能</h2>
-            <ul class="feature-list">
-                <li>局域网发送大屏消息</li>
-                <li>远程执行CMD命令</li>
-                <li>消息淡入淡出动画</li>
-                <li>智能IP提示系统</li>
-            </ul>
+            <h2>✨ v3.1.27.5 功能</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📢 大屏消息</h4>
+                    <p>局域网发送全屏通知</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ 远程CMD</h4>
+                    <p>远程执行命令行指令</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎨 淡入淡出</h4>
+                    <p>动画效果+新显示模式</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎯 智能IP提示</h4>
+                    <p>适用于固定IP台式机</p>
+                </div>
+            </div>
         </div>
         
-        <!-- 卡片：说明 -->
+        <!-- 说明卡片 -->
         <div class="card">
-            <h2>使用说明</h2>
-            <ul class="feature-list">
-                <li>双方设备需在同一局域网</li>
-                <li>接收端仅支持Windows</li>
-                <li>建议固定IP设备使用</li>
-            </ul>
+            <h2>📋 使用说明</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>🌐 同一局域网</h4>
+                    <p>双方设备需在同一网络</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🖥️ 接收端</h4>
+                    <p>仅支持Windows系统</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📍 固定IP</h4>
+                    <p>建议目标机有固定IP</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🔄 自动发现</h4>
+                    <p>设备即开即用</p>
+                </div>
+            </div>
         </div>
         
         <!-- 作者 -->
-        <div class="author">
-            <div style="margin-bottom: 8px;">现在高二 · 课余时间开发</div>
-            <div>
-                <a href="https://github.com/StackNi">StackNi</a> · 
-                <a href="https://github.com/StackNi/remote-control-platform">GitHub</a> · 
-                <a href="https://StackNi.github.io/remote-control-platform/">官网</a>
+        <div class="author-section">
+            <div class="author-name">StackNi</div>
+            <div class="author-desc">现在高二 · 课余时间开发</div>
+            <div class="author-links">
+                <a href="https://github.com/StackNi">GitHub</a>
+                <a href="https://github.com/StackNi/remote-control-platform">项目地址</a>
             </div>
         </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p>开源协议 · Apache License 2.0</p>
+            <p style="margin-top: 12px;">© 2025 StackNi · 远程控制平台</p>
+        </footer>
     </div>
+    
+    <script>
+        // 主题切换
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        
+        function setActiveTheme(theme) {
+            themeBtns.forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        setActiveTheme(document.documentElement.getAttribute('data-theme'));
+        
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                setActiveTheme(theme);
+            });
+        });
+        
+        // 处理图片加载失败：显示背景色
+        document.querySelectorAll('.logo-container img').forEach(img => {
+            img.onerror = function() {
+                this.style.display = 'none';
+                // 根据alt属性设置背景色
+                const alt = this.alt;
+                if (alt.includes('手机')) {
+                    this.parentElement.style.background = 'rgba(147, 51, 234, 0.1)';
+                } else if (alt.includes('电脑')) {
+                    this.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+                } else if (alt.includes('接收端')) {
+                    this.parentElement.style.background = 'rgba(37, 99, 235, 0.1)';
+                }
+                this.parentElement.style.borderRadius = '18px';
+            }
+        });
+    </script>
 </body>
 </html>

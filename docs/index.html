@@ -3,130 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remote Control Platform - 局域网通信控制系统</title>
-    <meta name="description" content="基于UDP的局域网通信与控制解决方案">
+    <title>远程控制平台 · StackNi</title>
+    <meta name="description" content="一名高二学生开发的局域网通信控制工具">
+    
+    <!-- 主题切换脚本（放在头部避免闪烁） -->
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    
     <style>
-        /* 极简设计风格 */
-        :root {
-            --primary: #2563eb;
-            --dark: #1e293b;
-            --light: #f8fafc;
+        /* ===== 主题变量 ===== */
+        :root[data-theme="dark"] {
+            --bg: #0a0c10;
+            --bg-card: #111316;
+            --text: #e1e6f0;
+            --text-secondary: #8b95a1;
+            --border: #22262b;
+            --glow: rgba(0, 255, 255, 0.1);
         }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        
+        :root[data-theme="light"] {
+            --bg: #f5f7fa;
+            --bg-card: #ffffff;
+            --text: #1a1e24;
+            --text-secondary: #4b5563;
+            --border: #e2e8f0;
+            --glow: rgba(37, 99, 235, 0.08);
+        }
+        
+        /* ===== 品牌色 ===== */
+        :root {
+            --purple: #9333ea;    /* 手机发送端 */
+            --red: #ef4444;       /* 电脑发送端 */
+            --blue: #2563eb;      /* Windows接收端 */
+            --purple-glow: rgba(147, 51, 234, 0.2);
+            --red-glow: rgba(239, 68, 68, 0.2);
+            --blue-glow: rgba(37, 99, 235, 0.2);
+        }
+        
+        * {
             margin: 0;
             padding: 0;
-            color: var(--dark);
+            box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
-        .hero {
-            background: linear-gradient(135deg, var(--primary), #7c3aed);
-            color: white;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 0 24px;
         }
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 1.8rem;
-            margin: 0.5rem;
-            background: white;
-            color: var(--primary);
-            text-decoration: none;
-            border-radius: 30px;
+        
+        /* ===== 导航栏 ===== */
+        .navbar {
+            padding: 24px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-img {
+            height: 40px;
+            width: auto;
+        }
+        
+        .logo-text {
+            font-size: 20px;
             font-weight: 600;
-            transition: transform 0.2s;
+            letter-spacing: 1px;
         }
-        .btn:hover {
-            transform: translateY(-2px);
+        
+        /* 主题切换按钮 */
+        .theme-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+            cursor: pointer;
         }
+        
+        .theme-option {
+            padding: 8px 16px;
+            border-radius: 32px;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .theme-option.active {
+            background: var(--text);
+            color: var(--bg);
+            font-weight: 500;
+        }
+        
+        /* ===== Hero区域 ===== */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+        
+        .badge strong {
+            color: var(--text);
+        }
+        
+        .hero h1 {
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        [data-theme="light"] .hero h1 {
+            background: linear-gradient(to right, #0f172a, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        
+        /* ===== 三色Logo展示 ===== */
+        .brand-showcase {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin: 60px 0;
+            padding: 20px;
+        }
+        
+        .brand-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .brand-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 12px;
+        }
+        
+        .brand-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .brand-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .purple-text { color: var(--purple); }
+        .red-text { color: var(--red); }
+        .blue-text { color: var(--blue); }
+        
+        /* ===== 平台卡片 ===== */
         .platforms {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            padding: 4rem 0;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin: 60px 0;
         }
-        .platform-card {
-            background: var(--light);
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            transition: transform 0.2s, border-color 0.2s;
         }
-        .status-badge {
+        
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: transparent;
+        }
+        
+        /* 卡片悬停光效 - 三色分别 */
+        .card-purple:hover {
+            box-shadow: 0 8px 30px var(--purple-glow);
+            border-color: var(--purple);
+        }
+        
+        .card-red:hover {
+            box-shadow: 0 8px 30px var(--red-glow);
+            border-color: var(--red);
+        }
+        
+        .card-blue:hover {
+            box-shadow: 0 8px 30px var(--blue-glow);
+            border-color: var(--blue);
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon img {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .card h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .version {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
+            padding: 4px 12px;
+            background: var(--bg);
             border-radius: 20px;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 20px;
         }
-        .status-available { background: #22c55e; color: white; }
-        .status-planned { background: #eab308; color: black; }
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 2rem;
+        
+        /* ===== 功能列表 ===== */
+        .features {
+            margin: 80px 0;
+        }
+        
+        .features h2 {
+            font-size: 32px;
+            margin-bottom: 40px;
             text-align: center;
-            margin-top: 4rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .feature-item {
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        
+        .feature-item h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        /* ===== 关于作者 ===== */
+        .author {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            margin: 80px 0;
+            text-align: center;
+        }
+        
+        .author h3 {
+            font-size: 28px;
+            margin-bottom: 16px;
+        }
+        
+        .author p {
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* ===== 页脚 ===== */
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            background: var(--text);
+            color: var(--bg);
+            text-decoration: none;
+            border-radius: 40px;
+            font-weight: 500;
+            margin: 8px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .download-btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        a {
+            color: var(--text);
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
-    <div class="hero">
-        <h1>Remote Control Platform</h1>
-        <p>简单、快速、可靠的局域网控制系统</p>
-        <div>
-            <a href="https://github.com/你的用户名/remote-control-platform/releases" class="btn">📥 下载最新版</a>
-            <a href="https://github.com/你的用户名/remote-control-platform" class="btn">⭐ GitHub</a>
-        </div>
-    </div>
-    
     <div class="container">
-        <h2 style="text-align: center; margin-top: 3rem;">支持平台</h2>
-        
-        <div class="platforms">
-            <div class="platform-card">
-                <h3>📱 发送端</h3>
-                <p>Windows FMX</p>
-                <span class="status-badge status-available">✅ 3.1.27.5</span>
-                <p>Android HTML+Java</p>
-                <span class="status-badge status-available">✅ 1.0.0</span>
-                <p>macOS</p>
-                <span class="status-badge status-planned">⏳ 2025 Q2</span>
-                <p>Linux</p>
-                <span class="status-badge status-planned">⏳ 2025 Q3</span>
-                <p>iOS</p>
-                <span class="status-badge status-planned">⏳ 2025 Q4</span>
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <div class="logo">
+                <!-- 这里放你的主Logo -->
+                <img src="docs/logo-main.png" alt="Remote Control" class="logo-img" onerror="this.style.display='none'">
+                <span class="logo-text">远程控制平台</span>
             </div>
             
-            <div class="platform-card">
-                <h3>🖥️ 接收端</h3>
-                <p>Windows WPF UI</p>
-                <span class="status-badge status-available">✅ 2.0.0</span>
-                <p>Windows Service</p>
-                <span class="status-badge status-available">✅ 1.0.0</span>
-                <p style="color: #94a3b8;">其他平台</p>
-                <span class="status-badge" style="background: #64748b;">❌ 暂无计划</span>
+            <!-- 主题切换 -->
+            <div class="theme-toggle" id="themeToggle">
+                <button class="theme-option" data-theme="dark">暗黑</button>
+                <button class="theme-option" data-theme="light">明亮</button>
+            </div>
+        </nav>
+        
+        <!-- Hero区域 -->
+        <div class="hero">
+            <div class="badge">
+                <strong>v3.1.27.5</strong> · 高二学生作品 · 开源免费
+            </div>
+            <h1>局域网通信控制<br>为教室、机房而生</h1>
+            <p>专为解决「快速传达信息」而设计的轻量工具</p>
+            <a href="https://github.com/StackNi/remote-control-platform/releases" class="download-btn">下载 Windows 版</a>
+            <a href="https://github.com/StackNi/remote-control-platform/releases" class="download-btn download-btn-outline">下载 Android 版</a>
+        </div>
+        
+        <!-- 三色Logo展示区（你的品牌色） -->
+        <div class="brand-showcase">
+            <div class="brand-item">
+                <div class="brand-logo">
+                    <img src="docs/logo-purple.png" alt="手机发送端" onerror="this.style.display='none'">
+                </div>
+                <span class="brand-label purple-text">📱 手机发送端</span>
+                <span style="color: var(--text-secondary); font-size: 12px;">紫色</span>
+            </div>
+            <div class="brand-item">
+                <div class="brand-logo">
+                    <img src="docs/logo-red.png" alt="电脑发送端" onerror="this.style.display='none'">
+                </div>
+                <span class="brand-label red-text">💻 电脑发送端</span>
+                <span style="color: var(--text-secondary); font-size: 12px;">红色</span>
+            </div>
+            <div class="brand-item">
+                <div class="brand-logo">
+                    <img src="docs/logo-blue.png" alt="Windows接收端" onerror="this.style.display='none'">
+                </div>
+                <span class="brand-label blue-text">🖥️ Windows接收端</span>
+                <span style="color: var(--text-secondary); font-size: 12px;">蓝色</span>
             </div>
         </div>
         
-        <div style="text-align: center; margin: 4rem 0;">
-            <h2>基于UDP协议</h2>
-            <p style="font-size: 1.2rem; max-width: 800px; margin: 0 auto;">
-                专为局域网设计的高速通信方案，极低延迟，稳定可靠
-            </p>
+        <!-- 平台卡片 -->
+        <div class="platforms">
+            <div class="card card-purple">
+                <div class="card-icon">
+                    <img src="docs/logo-purple.png" alt="Android" onerror="this.style.display='none'">
+                </div>
+                <h3>Android 发送端</h3>
+                <p>HTML + Java 架构，基础控制功能完善</p>
+                <span class="version">v1.0.0</span>
+            </div>
+            
+            <div class="card card-red">
+                <div class="card-icon">
+                    <img src="docs/logo-red.png" alt="Windows" onerror="this.style.display='none'">
+                </div>
+                <h3>Windows 发送端</h3>
+                <p>FMX 架构，完整控制指令集</p>
+                <span class="version">v3.1.27.5</span>
+            </div>
+            
+            <div class="card card-blue">
+                <div class="card-icon">
+                    <img src="docs/logo-blue.png" alt="Receiver" onerror="this.style.display='none'">
+                </div>
+                <h3>Windows 接收端</h3>
+                <p>WPF 界面 + Windows 服务双版本</p>
+                <span class="version">v2.0.0</span>
+            </div>
         </div>
+        
+        <!-- 功能列表 -->
+        <div class="features">
+            <h2>v3.1.27.5 新特性</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📢 大屏消息</h4>
+                    <p style="color: var(--text-secondary);">局域网内快速发送全屏通知</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ 远程CMD</h4>
+                    <p style="color: var(--text-secondary);">远程执行命令行指令</p>
+                </div>
+                <div class="feature-item">
+                    <h4>✨ 淡入淡出</h4>
+                    <p style="color: var(--text-secondary);">新增动画效果及显示模式</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎯 智能IP提示</h4>
+                    <p style="color: var(--text-secondary);">适用于固定IP台式机</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 关于作者 -->
+        <div class="author">
+            <h3>👨‍💻 关于作者</h3>
+            <p style="margin-bottom: 24px;">现在高二，课余时间开发。<br>如果这个工具对你有帮助，欢迎给个 Star ✨</p>
+            <div style="display: flex; gap: 16px; justify-content: center;">
+                <a href="https://github.com/StackNi" target="_blank" style="color: var(--text);">GitHub · StackNi</a>
+                <span style="color: var(--border);">|</span>
+                <a href="https://github.com/StackNi/remote-control-platform" style="color: var(--text);">项目地址</a>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p>开源协议 · Apache License 2.0</p>
+            <p style="margin-top: 16px;">💜 紫 · 手机端 ｜ ❤️ 红 · 电脑端 ｜ 💙 蓝 · 接收端</p>
+            <p style="margin-top: 24px;">© 2025 StackNi · 远程控制平台</p>
+        </footer>
     </div>
     
-    <footer>
-        <p>© 2025 Remote Control Platform. Open source under Apache 2.0.</p>
-        <p style="margin-top: 1rem; color: #94a3b8;">
-            <a href="https://github.com/你的用户名" style="color: white; text-decoration: none;">你的网名</a> · 
-            <a href="https://github.com/你的用户名/remote-control-platform" style="color: white; text-decoration: none;">GitHub</a>
-        </p>
-    </footer>
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        
+        // 设置当前主题的active状态
+        function setActiveTheme(theme) {
+            themeOptions.forEach(opt => {
+                if (opt.dataset.theme === theme) {
+                    opt.classList.add('active');
+                } else {
+                    opt.classList.remove('active');
+                }
+            });
+        }
+        
+        // 初始化
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        setActiveTheme(currentTheme);
+        
+        // 切换主题
+        themeOptions.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                setActiveTheme(theme);
+            });
+        });
+        
+        // 图片加载失败时显示占位色块
+        document.querySelectorAll('.brand-logo, .card-icon').forEach(el => {
+            const img = el.querySelector('img');
+            if (img) {
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    // 如果有父元素是brand-logo或card-icon，设置背景色
+                    if (el.classList.contains('brand-logo') || el.classList.contains('card-icon')) {
+                        const parentCard = el.closest('.card');
+                        if (parentCard) {
+                            if (parentCard.classList.contains('card-purple')) el.style.background = 'var(--purple-glow)';
+                            else if (parentCard.classList.contains('card-red')) el.style.background = 'var(--red-glow)';
+                            else if (parentCard.classList.contains('card-blue')) el.style.background = 'var(--blue-glow)';
+                        } else {
+                            // 品牌展示区的处理
+                            if (el.closest('.brand-item')?.querySelector('.purple-text')) el.style.background = 'var(--purple-glow)';
+                            else if (el.closest('.brand-item')?.querySelector('.red-text')) el.style.background = 'var(--red-glow)';
+                            else if (el.closest('.brand-item')?.querySelector('.blue-text')) el.style.background = 'var(--blue-glow)';
+                        }
+                        el.style.borderRadius = '16px';
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

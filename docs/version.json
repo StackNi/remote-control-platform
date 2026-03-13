@@ -1,9 +1,7 @@
 {
-  "latest_version": "3.1.1.6",
-  "release_notes": "修复了已知问题，新增了检查更新功能",
-  "download_url": {
+    "latest_version": "3.1.1.6",
+    "release_notes": "修复了已知问题，新增了检查更新功能",
     "android": "https://stackni.github.io/remote-control-platform/remotecontrol_3.1.1.5.apk",
-    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.1.1.5.exe"
-  },
-  "publish_date": "2026-03-13"
+    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.1.1.5.exe",
+    "publish_date": "2026-03-13"
 }

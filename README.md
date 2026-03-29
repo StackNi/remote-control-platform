@@ -5,22 +5,12 @@
 ## 技术实现
 这是一款采用Socket技术的局域网通信系统。目前接收端仅限Windows，发送端已推出Windows端和安卓端，底层通信基于UDP协议。
 
-## v3.1.27.5 版本功能
+## v3.1 版本功能
 - 局域网发送大屏消息
 - 远程执行CMD命令
 - 添加消息淡入淡出动画效果和新的显示模式
 - 新增智能IP提示词系统（适用于IP地址可控的台式机）
-
-## 下载地址
-Windows端：
-- 蓝奏云：https://wwwx.lanzoup.com/iyoTS39pcwna
-- 密码：6qq1
-- 安装包直链：https://h1.appinn.me/file/1762077815397_远程控制平台安装包.exe
-
-安卓端：
-- 蓝奏云：https://wwwx.lanzoup.com/i6P2L3apld1e
-- 密码：ab3z
-- 安装包直链：https://h1.appinn.me/file/1762765393771_signed.apk
+- 添加检查更新功能，自动迭代！
 
 ## 使用说明
 - 双方电脑需在同一局域网

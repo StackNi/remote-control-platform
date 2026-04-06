@@ -1,9 +1,45 @@
 <!DOCTYPE html>
-<script>
-fetch('https://stackni.github.io/remote-control-platform/version.json')
-  .then(r => r.json())
-  .then(d => location.href = d.android)
-  .catch(e => {
-    document.body.innerHTML = '页面跳转失败，请稍后重试<br><br>错误信息：' + e.message;
-  })
-</script>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>准备下载...</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+        }
+        a {
+            color: #1976d2;
+        }
+        .error {
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">正在获取下载链接...</div>
+
+    <script>
+        const jsonUrl = 'https://stackni.github.io/remote-control-platform/version.json';
+        let downloadUrl = '';
+
+        fetch(jsonUrl)
+            .then(response => response.json())
+            .then(data => {
+                downloadUrl = data.android;
+                if (downloadUrl) {
+                    window.location.href = downloadUrl;
+                    document.getElementById('status').innerHTML = '若自动下载未开始，<a id="manualLink">请点击这里手动下载</a>';
+                    document.getElementById('manualLink').href = downloadUrl;
+                } else {
+                    throw new Error('未找到下载链接，请稍后重试');
+                }
+            })
+            .catch(e => {
+                document.getElementById('status').innerHTML = '<span class="error">获取下载链接失败，请稍后重试<br>' + e.message + '</span>';
+            });
+    </script>
+</body>
+</html>

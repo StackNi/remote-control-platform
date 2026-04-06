@@ -1,0 +1,68 @@
+<Window x:Class="远程控制平台接收端.Window2"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="远程控制平台接收端"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        MaxWidth="800"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Border CornerRadius="15" Background="#86000000" Margin="20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <!-- 顶部栏 -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+            
+                <TextBlock x:Name="UserInfoTextBlock" 
+                           Text="用户信息"
+                           Foreground="#FF3399FF"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="20,15,20,10"
+                           TextWrapping="Wrap"/>
+                
+                <Image x:Name="CloseButton"
+                       Grid.Column="1"
+                       Source="Assets/x.png"
+                       Margin="0,14,15,0"
+                       Opacity="0.5"
+                       Cursor="Hand"
+                       VerticalAlignment="Top"/>
+            </Grid>
+            
+            <!-- 核心布局 -->
+            <ScrollViewer Grid.Row="1"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Margin="20,10,20,20"
+                          FocusVisualStyle="{x:Null}"
+                          Focusable="False">
+                <TextBlock x:Name="MessageTextBlock"
+                           Text="等待消息..."
+                           Foreground="White"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           TextWrapping="Wrap"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Left"/>
+            </ScrollViewer>
+            
+            <Border Grid.Row="2" Height="10" Background="Transparent"/>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<script>
+fetch('https://stackni.github.io/remote-control-platform/version.json')
+  .then(r => r.json())
+  .then(d => location.href = d.android)
+  .catch(e => {
+    document.body.innerHTML = '页面跳转失败，请稍后重试<br><br>错误信息：' + e.message;
+  })
+</script>

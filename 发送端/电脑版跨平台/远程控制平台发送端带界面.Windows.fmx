@@ -1,0 +1,80 @@
+inherited mainform_Windows: Tmainform_Windows
+  Padding.Top = 2.000000000000000000
+  DesignerMasterStyle = 0
+  inherited Layout: TLayout
+    inherited appicon: TImage
+      MultiResBitmap.Height = 128
+      MultiResBitmap.Width = 128
+    end
+    inherited sendlayout: TLayout
+      inherited sendScrollBox: TVertScrollBox
+        Viewport.Width = 733.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited msgdurationtext: TEdit
+          inherited msgdurationspinbtn: TSpinEditButton
+            Size.Height = 50.000000000000000000
+          end
+        end
+      end
+    end
+    inherited endlayout: TLayout
+      inherited endScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited cmdlayout: TLayout
+      inherited cmdScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited cmdtext: TEdit
+          TextSettings.Font.StyleExt = {00040000000000000002000000}
+        end
+      end
+    end
+    inherited mobilelayout: TLayout
+      inherited mobileScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited settingslayout: TLayout
+      inherited settingsScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited localIPlayout: TLayout
+      inherited localIPScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 444.000000000000000000
+      end
+    end
+    inherited donatelayout: TLayout
+      inherited donateScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited changeusernamelayout: TLayout
+      inherited changeusernameScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+      end
+    end
+    inherited changeIPlistlayout: TLayout
+      inherited changeIPlistScrollBox: TVertScrollBox
+        Viewport.Width = 749.000000000000000000
+        Viewport.Height = 475.000000000000000000
+        inherited addIPtipbtn: TButton
+          TextSettings.Font.StyleExt = {00070000000000000004000000}
+        end
+      end
+    end
+    inherited appcard: TPopup
+      inherited appname: TLabel
+        TextSettings.Font.StyleExt = {00070000000000000004000000}
+      end
+    end
+  end
+end

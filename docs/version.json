@@ -1,10 +1,10 @@
 {
     "android_version": "3.0.1",
-    "windows_version":"3.1.6",
+    "windows_version":"3.2.0",
     "android_notes": "新增检查更新功能",
-    "windows_notes": "修复了一些已知问题",
+    "windows_notes": "更新了通信协议，修复了一些已知问题",
     "android": "https://stackni.github.io/remote-control-platform/remotecontrol_3.0.1.apk",
-    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.1.6.exe",
+    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.exe",
     "android_date": "2026-03-25",
-    "windows_date": "2026-04-06"
+    "windows_date": "2026-08-02"
 }

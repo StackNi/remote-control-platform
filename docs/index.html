@@ -18,372 +18,472 @@
     </script>
     
     <style>
-        /* ===== 主题变量 - 完全重构 ===== */
-        /* 暗色主题（默认） */
-        [data-theme="dark"] {
-            --bg-body: #0d1117;
-            --bg-card: #161b22;
-            --bg-card-hover: #1c2333;
-            --bg-input: #0d1117;
-            --text-primary: #f0f6fc;
-            --text-secondary: #8b949e;
-            --text-muted: #484f58;
-            --border-color: #30363d;
-            --border-hover: #58a6ff;
-            --shadow: 0 8px 32px rgba(0,0,0,0.5);
-            --accent: #58a6ff;
-            --success: #3fb950;
-            --warning: #d29922;
+        /* ===== 主题变量 ===== */
+        :root[data-theme="dark"] {
+            --bg: #0a0c10;
+            --bg-card: #111316;
+            --text: #e1e6f0;
+            --text-secondary: #8b95a1;
+            --border: #22262b;
+            --border-light: #2a2e35;
         }
         
-        /* 亮色主题 - 彻底明亮 */
-        [data-theme="light"] {
-            --bg-body: #f6f8fa;
+        :root[data-theme="light"] {
+            --bg: #f5f7fa;
             --bg-card: #ffffff;
-            --bg-card-hover: #f3f4f6;
-            --bg-input: #ffffff;
-            --text-primary: #1f2328;
-            --text-secondary: #656d76;
-            --text-muted: #8b949e;
-            --border-color: #d0d7de;
-            --border-hover: #0969da;
-            --shadow: 0 8px 32px rgba(0,0,0,0.08);
-            --accent: #0969da;
-            --success: #2da44e;
-            --warning: #9a6700;
+            --text: #1a1e24;
+            --text-secondary: #4b5563;
+            --border: #e2e8f0;
+            --border-light: #d1d5db;
         }
-
-        /* ===== 全局重置 ===== */
+        
+        /* ===== 品牌色（仅用于logo容器）===== */
+        :root {
+            --purple: #9333ea;
+            --red: #ef4444;
+            --blue: #2563eb;
+            --purple-bg: rgba(147, 51, 234, 0.1);
+            --red-bg: rgba(239, 68, 68, 0.1);
+            --blue-bg: rgba(37, 99, 235, 0.1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        /* ===== 容器 ===== */
-        .container {
-            max-width: 1200px;
-            width: 100%;
-            background-color: var(--bg-card);
-            border-radius: 24px;
-            padding: 40px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        /* ===== 头部 ===== */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .header-left .logo {
-            font-size: 28px;
-        }
-
-        .header-left h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            color: var(--text-primary);
-        }
-
-        .header-left h1 span {
-            color: var(--text-secondary);
-            font-weight: 400;
-            font-size: 16px;
-            margin-left: 10px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* ===== 版本号 ===== */
-        .version-badge {
-            background: var(--border-color);
-            color: var(--text-secondary);
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            transition: all 0.3s ease;
-        }
-
-        /* ===== 主题切换按钮 ===== */
-        .theme-toggle {
-            background: var(--border-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .theme-toggle:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-hover);
-            transform: scale(1.05);
-        }
-
-        /* ===== 状态指示器 ===== */
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--border-color);
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 14px;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-        }
-
-        .status-badge .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.9); }
-        }
-
-        /* ===== 网格布局 ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 20px;
-            margin-top: 10px;
-        }
-
-        /* ===== 卡片 ===== */
-        .card {
-            background: var(--bg-body);
-            padding: 24px 20px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            transition: all 0.25s ease;
-            cursor: default;
-        }
-
-        .card:hover {
-            border-color: var(--border-hover);
-            background: var(--bg-card-hover);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow);
-        }
-
-        .card .icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .card h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
-        .card p {
-            font-size: 14px;
-            color: var(--text-secondary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
-
-        .card .badge {
-            display: inline-block;
-            margin-top: 12px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            background: var(--border-color);
-            padding: 4px 12px;
-            border-radius: 40px;
-            transition: all 0.3s ease;
+        
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px;
         }
-
-        /* ===== 底部 ===== */
-        .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
+        
+        /* ===== 导航栏 ===== */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo-area {
+            display: flex;
+            align-items: center;
             gap: 12px;
+        }
+        
+        .site-icon {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .site-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        /* 主题切换 */
+        .theme-toggle {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+        }
+        
+        .theme-btn {
+            padding: 6px 16px;
+            border-radius: 32px;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .theme-btn.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        /* ===== 头部信息 ===== */
+        .header {
+            margin-bottom: 48px;
+        }
+        
+        .title {
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+        
+        /* ===== 三logo展示 ===== */
+        .logo-showcase {
+            display: flex;
+            justify-content: flex-start;
+            gap: 32px;
+            margin: 48px 0 56px;
+        }
+        
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-container {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 12px;
+        }
+        
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .logo-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* 品牌色文字 */
+        .purple { color: var(--purple); }
+        .red { color: var(--red); }
+        .blue { color: var(--blue); }
+        
+        /* ===== 卡片 ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text);
+        }
+        
+        /* ===== 下载区域 ===== */
+        .download-section {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: transform 0.1s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .btn-primary {
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border-light);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--text-secondary);
+        }
+        
+        .install-note {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* ===== 功能列表 ===== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        
+        .feature-item {
+            padding: 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+        
+        .feature-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        
+        .feature-item p {
             font-size: 14px;
             color: var(--text-secondary);
-            transition: all 0.3s ease;
         }
-
-        .footer a {
+        
+        /* ===== 作者区 ===== */
+        .author-section {
+            margin-top: 60px;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+        }
+        
+        .author-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .author-desc {
             color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .author-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+        }
+        
+        .author-links a {
+            color: var(--text);
             text-decoration: none;
-            transition: color 0.2s;
+            font-size: 14px;
         }
-
-        .footer a:hover {
-            color: var(--text-primary);
+        
+        .author-links a:hover {
+            text-decoration: underline;
         }
-
-        /* ===== 响应式 ===== */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            .header-left h1 {
-                font-size: 20px;
-            }
-            .header-left h1 span {
-                display: block;
-                margin-left: 0;
-                font-size: 14px;
-                margin-top: 4px;
-            }
-            .grid {
-                grid-template-columns: 1fr;
-            }
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
+        
+        /* ===== 页脚 ===== */
+        footer {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="header-left">
-                <span class="logo">🖥️</span>
-                <h1>远程控制平台 <span>局域网通信与管理助手</span></h1>
+        <!-- 导航栏 -->
+        <div class="navbar">
+            <div class="logo-area">
+                <img src="/remote-control-platform/send.svg" alt="Remote Control" class="site-icon" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft=0;">
+                <span class="site-title">远程控制平台</span>
             </div>
-            <div class="header-right">
-                <div class="version-badge">版本 3.2.0</div>
-                <div class="status-badge">
-                    <span class="dot"></span>
-                    在线
-                </div>
-                <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
-                    🌙
-                </button>
-            </div>
-        </header>
-
-        <!-- 功能卡片 -->
-        <div class="grid">
-            <div class="card">
-                <span class="icon">📡</span>
-                <h3>设备发现</h3>
-                <p>自动扫描局域网内所有在线设备，快速建立连接。</p>
-                <span class="badge">实时扫描</span>
-            </div>
-            <div class="card">
-                <span class="icon">🔒</span>
-                <h3>安全通信</h3>
-                <p>端到端加密传输，保障你的数据隐私与安全。</p>
-                <span class="badge">AES-256</span>
-            </div>
-            <div class="card">
-                <span class="icon">⚡</span>
-                <h3>远程桌面</h3>
-                <p>低延迟屏幕共享，支持键盘鼠标控制。</p>
-                <span class="badge">60fps</span>
-            </div>
-            <div class="card">
-                <span class="icon">📁</span>
-                <h3>文件传输</h3>
-                <p>拖拽式文件分享，支持大文件断点续传。</p>
-                <span class="badge">P2P 加速</span>
-            </div>
-            <div class="card">
-                <span class="icon">💬</span>
-                <h3>即时消息</h3>
-                <p>内置聊天工具，团队协作更高效。</p>
-                <span class="badge">消息已读</span>
-            </div>
-            <div class="card">
-                <span class="icon">📊</span>
-                <h3>网络监控</h3>
-                <p>实时流量统计与连接状态总览。</p>
-                <span class="badge">带宽监测</span>
+            
+            <!-- 主题切换 -->
+            <div class="theme-toggle">
+                <button class="theme-btn" data-theme="dark">暗黑</button>
+                <button class="theme-btn" data-theme="light">明亮</button>
             </div>
         </div>
-
-        <!-- 底部 -->
-        <footer class="footer">
-            <span>© 2026 远程控制平台 · 开源项目</span>
-            <span>
-                <a href="#">帮助</a> · 
-                <a href="#">隐私</a> · 
-                <a href="#">GitHub</a>
-            </span>
+        
+        <!-- 头部 -->
+        <div class="header">
+            <span class="badge">v3.1.6</span>
+            <h1 class="title">局域网通信与控制工具</h1>
+            <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息与远程控制的需求</p>
+        </div>
+        
+        <!-- 三色Logo展示区（已上传，正常显示） -->
+        <div class="logo-showcase">
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-purple.png" alt="手机发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--purple-bg)';">
+                </div>
+                <span class="logo-label purple">📱 手机发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-red.png" alt="电脑发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--red-bg)';">
+                </div>
+                <span class="logo-label red">💻 电脑发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-blue.png" alt="Windows接收端" onerror="this.style.display='none'; this.parentElement.style.background='var(--blue-bg)';">
+                </div>
+                <span class="logo-label blue">🖥️ Windows接收端</span>
+            </div>
+        </div>
+        
+        <!-- 下载卡片 -->
+        <div class="card">
+            <h2>📦 下载</h2>
+            <div class="download-section">
+                <a href="/remote-control-platform/remotecontrol_3.1.6.exe" class="btn btn-primary">Windows 版安装包</a>
+                <a href="/remote-control-platform/remotecontrol_3.0.1.apk" class="btn btn-secondary">Android 版</a>
+            </div>
+            <div class="install-note">
+                Windows安装包包含：发送端 + 接收端 + 命令执行端
+            </div>
+        </div>
+        
+        <!-- 功能卡片 -->
+        <div class="card">
+            <h2>✨ v3.1.6 功能</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📢 大屏消息</h4>
+                    <p>局域网发送全屏通知</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ 远程CMD</h4>
+                    <p>远程执行命令行指令</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎨 淡入淡出</h4>
+                    <p>动画效果+新显示模式</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎯 智能IP提示</h4>
+                    <p>适用于固定IP台式机</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 说明卡片 -->
+        <div class="card">
+            <h2>📋 使用说明</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>🌐 同一局域网</h4>
+                    <p>双方设备需在同一网络</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🖥️ 接收端</h4>
+                    <p>仅支持Windows系统</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📍 固定IP</h4>
+                    <p>建议目标机有固定IP</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 作者 -->
+        <div class="author-section">
+            <div class="author-name">StackNi</div>
+            <div class="author-desc">高二课余时间开发</div>
+            <div class="author-links">
+                <a href="https://github.com/StackNi">GitHub</a>
+                <a href="https://github.com/StackNi/remote-control-platform">项目地址</a>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p>开源协议 · Apache License 2.0</p>
+            <p style="margin-top: 12px;">© 2026 StackNi · 远程控制平台</p>
         </footer>
     </div>
-
+    
     <script>
-        // ===== 主题切换逻辑 =====
-        const toggleBtn = document.getElementById('themeToggle');
-
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            toggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
-            
-            // 调试日志
-            console.log('主题已切换为:', theme);
+        // 主题切换
+        const themeBtns = document.querySelectorAll('.theme-btn');
+        
+        function setActiveTheme(theme) {
+            themeBtns.forEach(btn => {
+                if (btn.dataset.theme === theme) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
-
-        toggleBtn.addEventListener('click', () => {
-            const current = document.documentElement.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            setTheme(next);
+        
+        setActiveTheme(document.documentElement.getAttribute('data-theme'));
+        
+        themeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                setActiveTheme(theme);
+            });
         });
-
-        // 初始化按钮图标
-        (function initToggleIcon() {
-            const current = document.documentElement.getAttribute('data-theme');
-            toggleBtn.textContent = current === 'dark' ? '🌙' : '☀️';
-            console.log('当前主题:', current);
-        })();
+        
+        // 处理图片加载失败：显示背景色
+        document.querySelectorAll('.logo-container img').forEach(img => {
+            img.onerror = function() {
+                this.style.display = 'none';
+                // 根据alt属性设置背景色
+                const alt = this.alt;
+                if (alt.includes('手机')) {
+                    this.parentElement.style.background = 'rgba(147, 51, 234, 0.1)';
+                } else if (alt.includes('电脑')) {
+                    this.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+                } else if (alt.includes('接收端')) {
+                    this.parentElement.style.background = 'rgba(37, 99, 235, 0.1)';
+                }
+                this.parentElement.style.borderRadius = '18px';
+            }
+        });
     </script>
 </body>
 </html>

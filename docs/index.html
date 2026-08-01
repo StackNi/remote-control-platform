@@ -16,7 +16,7 @@
     </script>
     
     <style>
-        /* ===== 主题变量（用类名，不用属性）===== */
+        /* ===== 暗色模式 ===== */
         .theme-dark {
             --bg: #0a0c10;
             --bg-card: #111316;
@@ -28,15 +28,16 @@
             --shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
 
+        /* ===== 明亮模式（纯白+纯黑）===== */
         .theme-light {
-            --bg: #f2f4f8;
+            --bg: #ffffff;
             --bg-card: #ffffff;
-            --bg-hover: #f0f2f5;
-            --text: #1a1e24;
+            --bg-hover: #f9fafb;
+            --text: #000000;
             --text-muted: #4b5563;
-            --border: #dce1e8;
-            --border-light: #c8ced6;
-            --shadow: 0 8px 24px rgba(0,0,0,0.06);
+            --border: #e5e7eb;
+            --border-light: #d1d5db;
+            --shadow: 0 8px 24px rgba(0,0,0,0.04);
         }
 
         :root {
@@ -60,7 +61,7 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-            transition: background 0.25s, color 0.25s;
+            transition: background 0.3s, color 0.3s;
         }
 
         .container {
@@ -347,40 +348,32 @@
             .container {
                 padding: 24px 16px;
             }
-
             .navbar {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 16px;
             }
-
             .theme-toggle {
                 align-self: flex-start;
             }
-
             .title {
                 font-size: 30px;
             }
-
             .logo-showcase {
                 gap: 24px;
             }
-
             .logo-container {
                 width: 64px;
                 height: 64px;
                 padding: 12px;
             }
-
             .card {
                 padding: 20px;
             }
-
             .download-section {
                 flex-direction: column;
                 align-items: stretch;
             }
-
             .btn {
                 text-align: center;
             }
@@ -503,38 +496,32 @@
 
     <script>
         (function() {
-            const themeBtns = document.querySelectorAll('.theme-btn');
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.documentElement.className = 'theme-' + saved;
 
-            function setActive(theme) {
-                themeBtns.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.theme === theme);
-                });
-            }
+            const btns = document.querySelectorAll('.theme-btn');
+            btns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === saved);
+            });
 
-            // 初始化
-            const current = localStorage.getItem('theme') || 'dark';
-            document.documentElement.className = 'theme-' + current;
-            setActive(current);
-
-            themeBtns.forEach(btn => {
+            btns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const theme = this.dataset.theme;
                     document.documentElement.className = 'theme-' + theme;
                     localStorage.setItem('theme', theme);
-                    setActive(theme);
+                    btns.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
                 });
             });
 
-            // 图片加载失败降级
             document.querySelectorAll('.logo-container img').forEach(img => {
                 img.onerror = function() {
                     this.style.display = 'none';
-                    const parent = this.parentElement;
+                    const p = this.parentElement;
                     const alt = this.alt;
-                    if (alt.includes('手机')) parent.style.background = 'var(--purple-bg)';
-                    else if (alt.includes('电脑')) parent.style.background = 'var(--red-bg)';
-                    else if (alt.includes('接收端')) parent.style.background = 'var(--blue-bg)';
-                    parent.style.borderRadius = '20px';
+                    if (alt.includes('手机')) p.style.background = 'var(--purple-bg)';
+                    else if (alt.includes('电脑')) p.style.background = 'var(--red-bg)';
+                    else if (alt.includes('接收端')) p.style.background = 'var(--blue-bg)';
+                    p.style.borderRadius = '20px';
                 };
             });
         })();

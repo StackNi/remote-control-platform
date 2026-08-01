@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>远程控制平台 - 你的局域网通信与管理助手</title>
     
-    <!-- 网页图标 -->
     <link rel="icon" href="/remote-control-platform/send.ico">
     <link rel="alternate icon" href="/remote-control-platform/favicon.ico">
     
-    <!-- 主题脚本 -->
     <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'dark';
@@ -18,7 +16,7 @@
     </script>
     
     <style>
-        /* ===== 主题变量（修复明亮模式）===== */
+        /* ===== 主题变量 ===== */
         :root[data-theme="dark"] {
             --bg: #0a0c10;
             --bg-card: #111316;
@@ -41,7 +39,6 @@
             --shadow: rgba(0,0,0,0.06);
         }
         
-        /* ===== 品牌色 ===== */
         :root {
             --purple: #9333ea;
             --red: #ef4444;
@@ -72,7 +69,6 @@
             padding: 40px 24px;
         }
         
-        /* ===== 导航栏 ===== */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -98,7 +94,6 @@
             font-weight: 600;
         }
         
-        /* 主题切换 */
         .theme-toggle {
             display: flex;
             background: var(--bg-card);
@@ -123,7 +118,6 @@
             color: var(--bg);
         }
         
-        /* ===== 头部信息 ===== */
         .header {
             margin-bottom: 48px;
         }
@@ -153,12 +147,12 @@
             margin-bottom: 20px;
         }
         
-        /* ===== 三logo展示 ===== */
         .logo-showcase {
             display: flex;
-            justify-content: flex-start;
-            gap: 32px;
+            justify-content: center;
+            gap: 48px;
             margin: 48px 0 56px;
+            flex-wrap: wrap;
         }
         
         .logo-item {
@@ -169,15 +163,15 @@
         }
         
         .logo-container {
-            width: 64px;
-            height: 64px;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 12px;
+            border-radius: 20px;
+            padding: 16px;
         }
         
         .logo-container img {
@@ -187,16 +181,14 @@
         }
         
         .logo-label {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
         }
         
-        /* 品牌色文字 */
         .purple { color: var(--purple); }
         .red { color: var(--red); }
         .blue { color: var(--blue); }
         
-        /* ===== 卡片 ===== */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -213,7 +205,6 @@
             color: var(--text);
         }
         
-        /* ===== 下载区域 ===== */
         .download-section {
             display: flex;
             gap: 16px;
@@ -264,7 +255,6 @@
             font-size: 14px;
         }
         
-        /* ===== 功能列表 ===== */
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -297,7 +287,6 @@
             margin: 0;
         }
         
-        /* ===== 作者区 ===== */
         .author-section {
             margin-top: 60px;
             padding: 32px;
@@ -339,7 +328,6 @@
             opacity: 0.7;
         }
         
-        /* ===== 页脚 ===== */
         footer {
             margin-top: 48px;
             padding-top: 32px;
@@ -349,7 +337,6 @@
             font-size: 13px;
         }
         
-        /* ===== 响应式 ===== */
         @media (max-width: 600px) {
             .container {
                 padding: 24px 16px;
@@ -370,8 +357,7 @@
             }
             
             .logo-showcase {
-                gap: 20px;
-                flex-wrap: wrap;
+                gap: 24px;
             }
             
             .card {
@@ -392,34 +378,30 @@
             .logo-showcase {
                 flex-direction: column;
                 align-items: center;
+                gap: 16px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 导航栏 -->
         <div class="navbar">
             <div class="logo-area">
                 <img src="/remote-control-platform/send.svg" alt="Remote Control" class="site-icon" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft=0;">
                 <span class="site-title">远程控制平台</span>
             </div>
-            
-            <!-- 主题切换 -->
             <div class="theme-toggle">
                 <button class="theme-btn" data-theme="dark">暗黑</button>
                 <button class="theme-btn" data-theme="light">明亮</button>
             </div>
         </div>
         
-        <!-- 头部 -->
         <div class="header">
             <span class="badge">v3.2.0</span>
             <h1 class="title">局域网通信与控制工具</h1>
             <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息与远程控制的需求</p>
         </div>
         
-        <!-- 三色Logo展示区 -->
         <div class="logo-showcase">
             <div class="logo-item">
                 <div class="logo-container">
@@ -441,7 +423,6 @@
             </div>
         </div>
         
-        <!-- 下载卡片 -->
         <div class="card">
             <h2>📦 下载</h2>
             <div class="download-section">
@@ -453,7 +434,6 @@
             </div>
         </div>
         
-        <!-- 功能卡片 -->
         <div class="card">
             <h2>✨ v3.2.0 功能</h2>
             <div class="feature-grid">
@@ -476,7 +456,6 @@
             </div>
         </div>
         
-        <!-- 说明卡片 -->
         <div class="card">
             <h2>📋 使用说明</h2>
             <div class="feature-grid">
@@ -495,7 +474,6 @@
             </div>
         </div>
         
-        <!-- 作者 -->
         <div class="author-section">
             <div class="author-name">StackNi</div>
             <div class="author-desc">高二课余时间开发</div>
@@ -505,7 +483,6 @@
             </div>
         </div>
         
-        <!-- 页脚 -->
         <footer>
             <p>开源协议 · Apache License 2.0</p>
             <p style="margin-top: 12px;">© 2026 StackNi · 远程控制平台</p>
@@ -513,7 +490,6 @@
     </div>
     
     <script>
-        // 主题切换
         const themeBtns = document.querySelectorAll('.theme-btn');
         
         function setActiveTheme(theme) {
@@ -526,8 +502,7 @@
             });
         }
         
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        setActiveTheme(currentTheme);
+        setActiveTheme(document.documentElement.getAttribute('data-theme'));
         
         themeBtns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -538,7 +513,6 @@
             });
         });
         
-        // 处理图片加载失败
         document.querySelectorAll('.logo-container img').forEach(img => {
             img.onerror = function() {
                 this.style.display = 'none';
@@ -550,7 +524,7 @@
                 } else if (alt.includes('接收端')) {
                     this.parentElement.style.background = 'rgba(37, 99, 235, 0.1)';
                 }
-                this.parentElement.style.borderRadius = '18px';
+                this.parentElement.style.borderRadius = '20px';
             };
         });
     </script>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="theme-dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,12 +11,13 @@
     <script>
         (function() {
             const theme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.className = 'theme-' + theme;
         })();
     </script>
     
     <style>
-        :root[data-theme="dark"] {
+        /* ===== 主题变量（用类名，不用属性）===== */
+        .theme-dark {
             --bg: #0a0c10;
             --bg-card: #111316;
             --bg-hover: #1a1d23;
@@ -27,7 +28,7 @@
             --shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
 
-        :root[data-theme="light"] {
+        .theme-light {
             --bg: #f2f4f8;
             --bg-card: #ffffff;
             --bg-hover: #f0f2f5;
@@ -510,18 +511,21 @@
                 });
             }
 
-            const current = document.documentElement.getAttribute('data-theme');
+            // 初始化
+            const current = localStorage.getItem('theme') || 'dark';
+            document.documentElement.className = 'theme-' + current;
             setActive(current);
 
             themeBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
                     const theme = this.dataset.theme;
-                    document.documentElement.setAttribute('data-theme', theme);
+                    document.documentElement.className = 'theme-' + theme;
                     localStorage.setItem('theme', theme);
                     setActive(theme);
                 });
             });
 
+            // 图片加载失败降级
             document.querySelectorAll('.logo-container img').forEach(img => {
                 img.onerror = function() {
                     this.style.display = 'none';

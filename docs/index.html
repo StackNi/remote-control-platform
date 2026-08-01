@@ -18,35 +18,35 @@
     <style>
         /* ===== 暗色模式 ===== */
         .theme-dark {
-            --bg: #0a0c10;
-            --bg-card: #111316;
-            --bg-hover: #1a1d23;
-            --text: #e1e6f0;
-            --text-muted: #8b95a1;
-            --border: #22262b;
-            --border-light: #2a2e35;
-            --shadow: 0 8px 24px rgba(0,0,0,0.5);
+            --bg: #0d1117;
+            --bg-card: #161b22;
+            --bg-hover: #1c2333;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --border: #30363d;
+            --border-light: #424a53;
+            --shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
 
-        /* ===== 明亮模式（纯白+纯黑）===== */
+        /* ===== 明亮模式 ===== */
         .theme-light {
-            --bg: #ffffff;
+            --bg: #f6f8fa;
             --bg-card: #ffffff;
-            --bg-hover: #f9fafb;
-            --text: #000000;
-            --text-muted: #4b5563;
-            --border: #e5e7eb;
-            --border-light: #d1d5db;
-            --shadow: 0 8px 24px rgba(0,0,0,0.04);
+            --bg-hover: #f0f2f5;
+            --text: #1f2328;
+            --text-muted: #656d76;
+            --border: #d0d7de;
+            --border-light: #b9c1cc;
+            --shadow: 0 8px 24px rgba(0,0,0,0.05);
         }
 
         :root {
-            --purple: #9333ea;
-            --red: #ef4444;
-            --blue: #2563eb;
-            --purple-bg: rgba(147, 51, 234, 0.12);
-            --red-bg: rgba(239, 68, 68, 0.12);
-            --blue-bg: rgba(37, 99, 235, 0.12);
+            --purple: #a855f7;
+            --red: #f87171;
+            --blue: #60a5fa;
+            --purple-bg: rgba(168, 85, 247, 0.15);
+            --red-bg: rgba(248, 113, 113, 0.15);
+            --blue-bg: rgba(96, 165, 250, 0.15);
         }
 
         * {
@@ -70,13 +70,14 @@
             padding: 40px 24px;
         }
 
+        /* ===== 导航栏：分割线去掉，按钮在右上 ===== */
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 24px;
-            margin-bottom: 48px;
-            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+            margin-bottom: 40px;
+            /* border-bottom: none; 已去掉 */
         }
 
         .logo-area {
@@ -102,6 +103,7 @@
             border-radius: 40px;
             padding: 4px;
             gap: 2px;
+            flex-shrink: 0;
         }
 
         .theme-btn {
@@ -149,13 +151,14 @@
             max-width: 600px;
         }
 
+        /* ===== 三图标：小屏幕强制横向 ===== */
         .logo-showcase {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 48px;
             margin: 48px 0 56px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
 
         .logo-item {
@@ -163,6 +166,7 @@
             flex-direction: column;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
 
         .logo-container {
@@ -187,6 +191,7 @@
         .logo-label {
             font-size: 15px;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .purple { color: var(--purple); }
@@ -344,52 +349,74 @@
             margin-top: 8px;
         }
 
+        /* ===== 响应式 ===== */
         @media (max-width: 640px) {
             .container {
                 padding: 24px 16px;
             }
+
             .navbar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
             }
+
             .theme-toggle {
-                align-self: flex-start;
+                align-self: center;
             }
+
             .title {
                 font-size: 30px;
             }
+
             .logo-showcase {
-                gap: 24px;
+                gap: 16px;
             }
+
             .logo-container {
-                width: 64px;
-                height: 64px;
-                padding: 12px;
+                width: 60px;
+                height: 60px;
+                padding: 10px;
             }
+
+            .logo-label {
+                font-size: 12px;
+            }
+
             .card {
                 padding: 20px;
             }
+
             .download-section {
                 flex-direction: column;
                 align-items: stretch;
             }
+
             .btn {
                 text-align: center;
             }
         }
 
-        @media (max-width: 400px) {
+        @media (max-width: 480px) {
             .logo-showcase {
-                flex-direction: column;
-                align-items: center;
-                gap: 20px;
+                gap: 12px;
+            }
+
+            .logo-container {
+                width: 52px;
+                height: 52px;
+                padding: 8px;
+            }
+
+            .logo-label {
+                font-size: 11px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- ===== 导航栏：分割线已去掉 ===== -->
         <div class="navbar">
             <div class="logo-area">
                 <img src="/remote-control-platform/send.svg" alt="Remote Control" class="site-icon" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft=0;">
@@ -407,6 +434,7 @@
             <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息与远程控制的需求</p>
         </div>
 
+        <!-- ===== 三图标：小屏幕强制横向 ===== -->
         <div class="logo-showcase">
             <div class="logo-item">
                 <div class="logo-container">

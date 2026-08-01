@@ -18,23 +18,39 @@
     </script>
     
     <style>
-        /* ===== 主题变量 ===== */
+        /* ===== 主题变量 - 完全重构 ===== */
+        /* 暗色主题（默认） */
         [data-theme="dark"] {
-            --bg: #0a0c10;
-            --bg-card: #111316;
-            --text: #e1e6f0;
-            --text-secondary: #8b95a1;
-            --border: #22262b;
-            --border-light: #2a2e35;
+            --bg-body: #0d1117;
+            --bg-card: #161b22;
+            --bg-card-hover: #1c2333;
+            --bg-input: #0d1117;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --text-muted: #484f58;
+            --border-color: #30363d;
+            --border-hover: #58a6ff;
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
         }
         
+        /* 亮色主题 - 彻底明亮 */
         [data-theme="light"] {
-            --bg: #f5f7fa;
+            --bg-body: #f6f8fa;
             --bg-card: #ffffff;
-            --text: #1a1e24;
-            --text-secondary: #4b5563;
-            --border: #e2e8f0;
-            --border-light: #d1d9e6;
+            --bg-card-hover: #f3f4f6;
+            --bg-input: #ffffff;
+            --text-primary: #1f2328;
+            --text-secondary: #656d76;
+            --text-muted: #8b949e;
+            --border-color: #d0d7de;
+            --border-hover: #0969da;
+            --shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --accent: #0969da;
+            --success: #2da44e;
+            --warning: #9a6700;
         }
 
         /* ===== 全局重置 ===== */
@@ -46,14 +62,14 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         /* ===== 容器 ===== */
@@ -61,11 +77,11 @@
             max-width: 1200px;
             width: 100%;
             background-color: var(--bg-card);
-            border-radius: 20px;
+            border-radius: 24px;
             padding: 40px;
-            border: 1px solid var(--border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            transition: background-color 0.3s, border-color 0.3s;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
         }
 
         /* ===== 头部 ===== */
@@ -92,6 +108,7 @@
             font-size: 24px;
             font-weight: 700;
             letter-spacing: -0.5px;
+            color: var(--text-primary);
         }
 
         .header-left h1 span {
@@ -107,24 +124,37 @@
             gap: 16px;
         }
 
+        /* ===== 版本号 ===== */
+        .version-badge {
+            background: var(--border-color);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+
         /* ===== 主题切换按钮 ===== */
         .theme-toggle {
-            background: var(--border);
-            border: none;
-            color: var(--text);
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
             width: 44px;
             height: 44px;
             border-radius: 50%;
             font-size: 20px;
             cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .theme-toggle:hover {
-            background: var(--border-light);
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
             transform: scale(1.05);
         }
 
@@ -133,24 +163,25 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: var(--border);
+            background: var(--border-color);
             padding: 8px 16px;
             border-radius: 40px;
             font-size: 14px;
             color: var(--text-secondary);
+            transition: all 0.3s ease;
         }
 
         .status-badge .dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: #4ade80;
+            background: var(--success);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
         }
 
         /* ===== 网格布局 ===== */
@@ -163,17 +194,19 @@
 
         /* ===== 卡片 ===== */
         .card {
-            background: var(--bg);
+            background: var(--bg-body);
             padding: 24px 20px;
             border-radius: 16px;
-            border: 1px solid var(--border);
-            transition: border-color 0.2s, transform 0.2s;
+            border: 1px solid var(--border-color);
+            transition: all 0.25s ease;
             cursor: default;
         }
 
         .card:hover {
-            border-color: var(--text-secondary);
-            transform: translateY(-2px);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
         }
 
         .card .icon {
@@ -186,6 +219,7 @@
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 6px;
+            color: var(--text-primary);
         }
 
         .card p {
@@ -199,16 +233,17 @@
             margin-top: 12px;
             font-size: 12px;
             color: var(--text-secondary);
-            background: var(--border);
+            background: var(--border-color);
             padding: 4px 12px;
             border-radius: 40px;
+            transition: all 0.3s ease;
         }
 
         /* ===== 底部 ===== */
         .footer {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -216,6 +251,7 @@
             gap: 12px;
             font-size: 14px;
             color: var(--text-secondary);
+            transition: all 0.3s ease;
         }
 
         .footer a {
@@ -225,7 +261,7 @@
         }
 
         .footer a:hover {
-            color: var(--text);
+            color: var(--text-primary);
         }
 
         /* ===== 响应式 ===== */
@@ -240,9 +276,14 @@
                 display: block;
                 margin-left: 0;
                 font-size: 14px;
+                margin-top: 4px;
             }
             .grid {
                 grid-template-columns: 1fr;
+            }
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
             }
         }
     </style>
@@ -256,6 +297,7 @@
                 <h1>远程控制平台 <span>局域网通信与管理助手</span></h1>
             </div>
             <div class="header-right">
+                <div class="version-badge">版本 3.2.0</div>
                 <div class="status-badge">
                     <span class="dot"></span>
                     在线
@@ -325,6 +367,9 @@
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('theme', theme);
             toggleBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+            
+            // 调试日志
+            console.log('主题已切换为:', theme);
         }
 
         toggleBtn.addEventListener('click', () => {
@@ -337,6 +382,7 @@
         (function initToggleIcon() {
             const current = document.documentElement.getAttribute('data-theme');
             toggleBtn.textContent = current === 'dark' ? '🌙' : '☀️';
+            console.log('当前主题:', current);
         })();
     </script>
 </body>

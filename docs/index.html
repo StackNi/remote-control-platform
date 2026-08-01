@@ -18,26 +18,30 @@
     </script>
     
     <style>
-        /* ===== 主题变量 ===== */
+        /* ===== 主题变量（修复明亮模式）===== */
         :root[data-theme="dark"] {
             --bg: #0a0c10;
             --bg-card: #111316;
+            --bg-card-hover: #181b20;
             --text: #e1e6f0;
             --text-secondary: #8b95a1;
             --border: #22262b;
             --border-light: #2a2e35;
+            --shadow: rgba(0,0,0,0.3);
         }
         
         :root[data-theme="light"] {
-            --bg: #f5f7fa;
+            --bg: #f0f2f5;
             --bg-card: #ffffff;
+            --bg-card-hover: #f7f9fc;
             --text: #1a1e24;
             --text-secondary: #4b5563;
-            --border: #e2e8f0;
-            --border-light: #d1d5db;
+            --border: #dce1e8;
+            --border-light: #c8ced6;
+            --shadow: rgba(0,0,0,0.06);
         }
         
-        /* ===== 品牌色（仅用于logo容器）===== */
+        /* ===== 品牌色 ===== */
         :root {
             --purple: #9333ea;
             --red: #ef4444;
@@ -51,7 +55,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.2s, border-color 0.2s;
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
         }
         
         body {
@@ -59,6 +63,7 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.6;
+            min-height: 100vh;
         }
         
         .container {
@@ -110,6 +115,7 @@
             color: var(--text-secondary);
             border: none;
             cursor: pointer;
+            transition: all 0.2s;
         }
         
         .theme-btn.active {
@@ -197,6 +203,7 @@
             border-radius: 24px;
             padding: 32px;
             margin-bottom: 24px;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         
         .card h2 {
@@ -221,16 +228,21 @@
             text-decoration: none;
             font-size: 15px;
             font-weight: 500;
-            transition: transform 0.1s;
+            transition: transform 0.15s, box-shadow 0.2s;
         }
         
         .btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
         }
         
         .btn-primary {
             background: var(--text);
             color: var(--bg);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px var(--shadow);
         }
         
         .btn-secondary {
@@ -240,7 +252,7 @@
         }
         
         .btn-secondary:hover {
-            background: var(--bg-card);
+            background: var(--bg-card-hover);
             border-color: var(--text-secondary);
         }
         
@@ -255,27 +267,34 @@
         /* ===== 功能列表 ===== */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
         }
         
         .feature-item {
-            padding: 16px;
+            padding: 18px 20px;
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 16px;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+        
+        .feature-item:hover {
+            border-color: var(--text-secondary);
+            transform: translateY(-2px);
         }
         
         .feature-item h4 {
             font-size: 16px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--text);
         }
         
         .feature-item p {
             font-size: 14px;
             color: var(--text-secondary);
+            margin: 0;
         }
         
         /* ===== 作者区 ===== */
@@ -286,6 +305,7 @@
             border: 1px solid var(--border);
             border-radius: 24px;
             text-align: center;
+            box-shadow: 0 2px 8px var(--shadow);
         }
         
         .author-name {
@@ -304,16 +324,19 @@
             display: flex;
             gap: 24px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .author-links a {
             color: var(--text);
             text-decoration: none;
             font-size: 14px;
+            transition: opacity 0.2s;
         }
         
         .author-links a:hover {
             text-decoration: underline;
+            opacity: 0.7;
         }
         
         /* ===== 页脚 ===== */
@@ -324,6 +347,52 @@
             text-align: center;
             color: var(--text-secondary);
             font-size: 13px;
+        }
+        
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 24px 16px;
+            }
+            
+            .title {
+                font-size: 30px;
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            
+            .theme-toggle {
+                align-self: flex-start;
+            }
+            
+            .logo-showcase {
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .download-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .logo-showcase {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -345,12 +414,12 @@
         
         <!-- 头部 -->
         <div class="header">
-            <span class="badge">v3.1.6</span>
+            <span class="badge">v3.2.0</span>
             <h1 class="title">局域网通信与控制工具</h1>
             <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息与远程控制的需求</p>
         </div>
         
-        <!-- 三色Logo展示区（已上传，正常显示） -->
+        <!-- 三色Logo展示区 -->
         <div class="logo-showcase">
             <div class="logo-item">
                 <div class="logo-container">
@@ -376,7 +445,7 @@
         <div class="card">
             <h2>📦 下载</h2>
             <div class="download-section">
-                <a href="/remote-control-platform/remotecontrol_3.1.6.exe" class="btn btn-primary">Windows 版安装包</a>
+                <a href="/remote-control-platform/remotecontrol_3.2.0.exe" class="btn btn-primary">Windows 版安装包</a>
                 <a href="/remote-control-platform/remotecontrol_3.0.1.apk" class="btn btn-secondary">Android 版</a>
             </div>
             <div class="install-note">
@@ -386,7 +455,7 @@
         
         <!-- 功能卡片 -->
         <div class="card">
-            <h2>✨ v3.1.6 功能</h2>
+            <h2>✨ v3.2.0 功能</h2>
             <div class="feature-grid">
                 <div class="feature-item">
                     <h4>📢 大屏消息</h4>
@@ -398,7 +467,7 @@
                 </div>
                 <div class="feature-item">
                     <h4>🎨 淡入淡出</h4>
-                    <p>动画效果+新显示模式</p>
+                    <p>动画效果 + 新显示模式</p>
                 </div>
                 <div class="feature-item">
                     <h4>🎯 智能IP提示</h4>
@@ -457,7 +526,8 @@
             });
         }
         
-        setActiveTheme(document.documentElement.getAttribute('data-theme'));
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        setActiveTheme(currentTheme);
         
         themeBtns.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -468,11 +538,10 @@
             });
         });
         
-        // 处理图片加载失败：显示背景色
+        // 处理图片加载失败
         document.querySelectorAll('.logo-container img').forEach(img => {
             img.onerror = function() {
                 this.style.display = 'none';
-                // 根据alt属性设置背景色
                 const alt = this.alt;
                 if (alt.includes('手机')) {
                     this.parentElement.style.background = 'rgba(147, 51, 234, 0.1)';
@@ -482,7 +551,7 @@
                     this.parentElement.style.background = 'rgba(37, 99, 235, 0.1)';
                 }
                 this.parentElement.style.borderRadius = '18px';
-            }
+            };
         });
     </script>
 </body>

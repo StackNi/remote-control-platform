@@ -23,7 +23,7 @@
 
 ## 下载地址
 
-**Windows 发送端（3.2.0）：**
+**Windows 发送端+接收端（3.2.0）：**
 - GitHub 发布页：[https://github.com/StackNi/remote-control-platform/releases](https://github.com/StackNi/remote-control-platform/releases)
 - 安装包直链：[https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.exe](https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.exe)
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<style name="Theme.MyApplication" parent="android:Theme.Material.Light.DarkActionBar">
+<item name="android:colorPrimary">@color/purple_500</item>
+<item name="android:colorSecondary">@color/teal_200</item>
+<item name="android:statusBarColor">@color/purple_700</item>
+<item name="android:windowSplashScreenBackground">@color/splash_background_light</item>
+<item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+</style>
+</resources>

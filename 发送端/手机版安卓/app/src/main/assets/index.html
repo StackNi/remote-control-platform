@@ -1,0 +1,2502 @@
+<html lang="zh-CN">
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>远程控制平台</title>
+<script>
+(function() {
+    'use strict';
+
+    // 立即执行，在页面渲染前设置主题
+    try {
+        // 读取保存的主题设置
+        const savedTheme = localStorage.getItem('theme') || 'auto';
+        let actualTheme = savedTheme;
+
+        // 如果是自动模式，检测系统主题
+        if (savedTheme === 'auto') {
+            // 优先从Android接口获取
+            if (window.Android && typeof Android.getSystemTheme === 'function') {
+                actualTheme = Android.getSystemTheme();
+            } else {
+                // 检测系统主题
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    actualTheme = 'dark';
+                } else {
+                    actualTheme = 'light';
+                }
+            }
+        }
+
+        console.log('初始主题设置:', { savedTheme, actualTheme });
+
+        // 关键：在DOMContentLoaded之前就设置night-mode类
+        // 创建一个立即执行的函数来添加类
+        const applyTheme = (theme) => {
+            // 统一处理主题初始化
+            const initTheme = () => {
+                if (theme === 'dark') {
+                    document.body.classList.add('night-mode');
+                }
+                document.body.classList.add('theme-initialized');
+            };
+
+            if (document.body) {
+                // body已经存在，直接初始化
+                initTheme();
+            } else {
+                // body还不存在，等待DOMContentLoaded
+                document.addEventListener('DOMContentLoaded', initTheme);
+            }
+        };
+
+        // 立即应用主题
+        applyTheme(actualTheme);
+
+        // 存储实际主题，供后续使用
+        window._initialTheme = actualTheme;
+
+    } catch (error) {
+        console.error('主题设置失败:', error);
+    }
+})();
+</script>
+<style>
+/* 防止页面闪烁 - 在CSS最开始处添加 */
+body:not(.theme-initialized) {
+    opacity: 0;
+    visibility: hidden;
+}
+
+body.theme-initialized {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.1s ease;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 顶部标题栏 */
+.header {
+    background-color: #3700B3;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+    box-sizing: border-box;
+}
+
+.back-btn {
+    position: absolute;
+    left: 7px;
+    top: 50%;
+    cursor: pointer;
+    transform: translateY(-50%);
+    display: none;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.back-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+/* 主内容区域 */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    margin-top: 60px;
+    margin-bottom: 70px;
+}
+
+/* 底部导航栏 */
+.footer {
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 15px;
+    border-radius: 8px;
+    transition: background-color 0.1s;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 5px;
+    transition: filter 0.1s;
+}
+
+.nav-label {
+    font-size: 12px;
+    color: #000000;
+}
+
+.nav-item.active .nav-label {
+    color: #3700b3;
+    transition: color 0.1s ease;
+}
+
+.nav-item.active .nav-icon {
+    filter: brightness(0) saturate(100%) invert(16%) sepia(89%) saturate(4154%) hue-rotate(258deg) brightness(89%) contrast(117%);
+}
+
+/* 按钮样式 */
+.btn {
+    background-color: #3700B3;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin: 10px 0;
+    transition: background-color 0.2s;
+}
+
+.btn:hover {
+    background-color: #28008C;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.btn-add {
+    background-color: #27ae60;
+    font-size: 28px;
+    padding: 4px 20px;
+}
+
+.btn-add:hover {
+    background-color: #219955;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: #3700B3;
+}
+
+/* 修复单选/复选框对齐 */
+.radio-option, .checkbox-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.radio-option input[type="radio"],
+.checkbox-option input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    margin-right: 8px;
+    appearance: auto;
+    -webkit-appearance: auto;
+}
+
+.radio-option label,
+.checkbox-option label {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* 页面容器 */
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+/* 主页按钮样式 */
+.home-buttons {
+    display: flex;
+    flex-direction: column;
+    margin-top: 30px;
+}
+
+.home-btn {
+    margin-bottom: 15px;
+}
+
+.home-btn:last-child {
+    margin-bottom: 0;
+}
+
+.home-btn {
+    background-color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.1s ease;
+}
+
+.home-btn:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.home-btn:active {
+    background-color: #e6e6e6;
+    transition: background-color 0.1s ease;
+}
+
+/* 结果页面样式 */
+.result-page {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.result-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 6px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    object-fit: contain;
+}
+
+/* 我的页面样式 */
+.user-info {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-info:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.user-details {
+    line-height: 1.6;
+    padding-right: 30px;
+}
+
+.username {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ip-list {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.ip-item {
+    padding: 2px 0;
+}
+
+.right-arrow {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    width: 30px;
+    height: 30px;
+    transform: translateY(-50%);
+    filter: brightness(0) invert(1);
+    margin-left: auto;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.menu-btn {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: none;
+    padding: 12px 10px 12px 16px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+    position: relative;
+    margin-bottom: 0;
+}
+
+.menu-btn:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background-color: #f0f0f0;
+}
+
+.menu-btn:hover {
+    background-color: #e6e6e6;
+}
+
+.menu-btn:active {
+    background-color: #c6c6c6;
+    transition: background-color 0.1s ease;
+}
+
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.push-icon {
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+/* 关于页面样式 */
+.about-page {
+    padding: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.about-logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 8px;
+    display: block;
+}
+
+.about-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #3700B3;
+}
+
+.about-version {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.about-author {
+    color: #888;
+    font-size: 13px;
+}
+
+.about-section {
+    margin-bottom: 16px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.about-section:last-child {
+    margin-bottom: 0;
+}
+
+.about-section h3 {
+    color: #3700B3;
+    margin-bottom: 12px;
+    font-size: 18px;
+    border-left: 4px solid #3700B3;
+    padding-left: 10px;
+}
+
+.about-section p {
+    text-align: justify;
+}
+
+.feature-list {
+    padding-left: 20px;
+}
+
+.feature-list li {
+    margin-bottom: 8px;
+}
+
+.feature-list li:last-child {
+    margin-bottom: 0;  /* 最后一个li下边距为0 */
+}
+
+.donate-image {
+    width: 280px;
+    max-width: 90%;
+    display: block;
+    margin: 15px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.scenario-list {
+    display: block;
+    margin-top: 10px;
+}
+
+.scenario-item {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 3px solid #3700B3;
+    margin-bottom: 10px;
+}
+
+.scenario-list .scenario-item:last-child {
+    margin-bottom: 0;
+}
+
+/* 提示词列表样式 */
+.keyword-list {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.keyword-list .keyword-item:last-child {
+    margin-bottom: 0;
+}
+
+.keyword-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    margin-bottom: 10px;
+}
+
+.keyword-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.keyword-default {
+    background-color: #f8f9fa;
+    border-left: 4px solid #3700B3;
+}
+
+.keyword-normal {
+    border-left: 4px solid #27ae60;
+}
+
+.keyword-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.keyword-ip {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 双按钮布局 */
+.dual-buttons {
+    display: flex;
+    margin: 0 5px;
+    margin-top: 20px;
+}
+
+.dual-buttons .btn:first-child {
+    margin-left: 0;
+}
+
+.dual-buttons .btn:last-child {
+    margin-right: 0;
+}
+
+.dual-buttons .btn {
+    flex: 1;
+    margin: 0 5px;
+}
+
+/* 信息显示样式 */
+.info-display {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.info-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.info-value {
+    color: #3498db;
+    font-size: 16px;
+}
+
+/* 移除所有元素的点击高亮 */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* 夜间模式样式 */
+body.night-mode {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+.night-mode .header {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+/* 修复夜间模式底部导航栏阴影 */
+.night-mode .footer {
+    background-color: #121212;
+    border-top: 1px solid #333;
+    box-shadow: 0 -2px 5px rgba(255, 255, 255, 0.1); /* 添加白色阴影 */
+}
+
+/* 夜间模式底部导航栏 */
+.night-mode .nav-label {
+    color: #e0e0e0;
+}
+
+.night-mode .nav-icon {
+    filter: brightness(0) invert(1);
+}
+
+.night-mode .nav-item.active .nav-label {
+    color: #bb86fc;
+}
+
+.night-mode .nav-item.active .nav-icon {
+    filter: brightness(0) saturate(100%) invert(67%) sepia(33%) saturate(1352%) hue-rotate(210deg) brightness(89%) contrast(85%);
+}
+
+.night-mode .content {
+    background-color: #1a1a1a;
+}
+
+.night-mode .back-icon,
+.night-mode .right-arrow,
+.night-mode .btn-icon,
+.night-mode .push-icon {
+    filter: brightness(0) invert(1);
+}
+
+.night-mode .home-btn,
+.night-mode .menu-buttons,
+.night-mode .about-section,
+.night-mode .about-header,
+.night-mode .info-display,
+.night-mode .keyword-item {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.night-mode .home-btn:hover {
+    background-color: #3d3d3d;
+}
+
+.night-mode .home-btn:active {
+    background-color: #4d4d4d;
+}
+
+.night-mode input,
+.night-mode select {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+.night-mode input:focus,
+.night-mode select:focus {
+    border-color: #bb86fc;
+}
+
+.night-mode .btn {
+    background-color: #bb86fc;
+    color: #000;
+}
+
+.night-mode .btn:hover {
+    background-color: #9d67e8;
+}
+
+.night-mode .user-info {
+    background: linear-gradient(135deg, #333 0%, #555 100%);
+    color: #e0e0e0;
+}
+
+.night-mode .menu-btn {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.night-mode .menu-btn:hover {
+    background-color: #3d3d3d;
+}
+
+.night-mode .menu-btn:active {
+    background-color: #4d4d4d;
+}
+
+.night-mode .menu-btn:not(:last-child)::after {
+    background-color: #444;
+}
+
+.night-mode .about-title {
+    color: #bb86fc;
+}
+
+.night-mode .about-section h3 {
+    color: #bb86fc;
+    border-left-color: #bb86fc;
+}
+
+.night-mode .scenario-item {
+    background: #333;
+    border-left-color: #bb86fc;
+}
+
+.night-mode .keyword-default {
+    background-color: #333;
+    border-left-color: #bb86fc;
+}
+
+.night-mode .keyword-normal {
+    border-left-color: #03dac6;
+}
+
+.night-mode .info-label {
+    color: #bb86fc;
+}
+
+.night-mode .info-value {
+    color: #03dac6;
+}
+/* 夜间模式下的发光效果 - 修正版 */
+.night-mode .user-info {
+    background: linear-gradient(135deg, #444 0%, #666 100%);
+    box-shadow:
+        0 2px 5px rgba(255, 255, 255, 0.1),
+        0 4px 15px rgba(255, 255, 255, 0.2);
+}
+
+.night-mode .user-info:hover {
+    box-shadow:
+        0 4px 8px rgba(255, 255, 255, 0.15),
+        0 6px 20px rgba(255, 255, 255, 0.25);
+}
+
+.night-mode .home-btn {
+    background-color: #2d2d2d;
+    box-shadow:
+        0 2px 5px rgba(255, 255, 255, 0.05),
+        0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .home-btn:hover {
+    box-shadow:
+        0 4px 8px rgba(255, 255, 255, 0.08),
+        0 4px 15px rgba(255, 255, 255, 0.15);
+}
+
+.night-mode .keyword-item {
+    background-color: #2d2d2d;
+    box-shadow:
+        0 2px 5px rgba(255, 255, 255, 0.05),
+        0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .keyword-item:hover {
+    box-shadow:
+        0 4px 8px rgba(255, 255, 255, 0.08),
+        0 4px 15px rgba(255, 255, 255, 0.15);
+}
+
+.night-mode .keyword-default {
+    background-color: #333;
+    box-shadow:
+        0 2px 5px rgba(255, 255, 255, 0.05),
+        0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+.night-mode .keyword-normal {
+    background-color: #2d2d2d;
+    box-shadow:
+        0 2px 5px rgba(255, 255, 255, 0.05),
+        0 2px 10px rgba(255, 255, 255, 0.1);
+}
+
+/* 夜间模式下的特殊按钮颜色 */
+.night-mode .btn-danger {
+    background-color: #cf6679 !important;
+    color: #000;
+}
+
+.night-mode .btn-danger:hover {
+    background-color: #a84355 !important;
+}
+
+.night-mode .btn-add {
+    background-color: #03dac6 !important;
+    color: #000;
+}
+
+.night-mode .btn-add:hover {
+    background-color: #018786 !important;
+}
+
+/* 夜间模式下的链接颜色 */
+.night-mode .about-section div[onclick*="openUrl"] {
+    color: #58a6ff !important;
+}
+
+/* 以后再说按钮颜色 */
+.btn-later {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+}
+
+.btn-later:hover {
+    background-color: #e6e6e6 !important;
+}
+
+/* 夜间模式 */
+.night-mode .btn-later {
+    background-color: #3d3d3d;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+.night-mode .btn-later:hover {
+    background-color: #4d4d4d !important;
+}
+
+/* 夜间模式下的红点 */
+.night-mode .red-dot,
+.night-mode .nav-red-dot {
+    background-color: #ff8888;
+    box-shadow: 0 0 4px rgba(255, 136, 136, 0.5);
+}
+
+/* 成功图标 → 亮绿色 */
+.night-mode .result-icon.success {
+    filter: brightness(0) saturate(100%) invert(58%) sepia(91%) saturate(490%) hue-rotate(88deg);
+}
+
+/* 失败图标 → 亮红色 */
+.night-mode .result-icon.failure {
+    filter: brightness(0) saturate(100%) invert(46%) sepia(99%) saturate(1624%) hue-rotate(336deg);
+}
+
+/* 等待图标 → 纯白色 */
+.night-mode .result-icon.waiting {
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* 超时图标 → 纯白色 */
+.night-mode .result-icon.timeout {
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* 警告图标 → 亮黄色 */
+.night-mode .result-icon.warning {
+    filter: brightness(0) saturate(100%) invert(85%) sepia(65%) saturate(780%) hue-rotate(351deg);
+}
+
+</style>
+</head>
+<body>
+<!-- 顶部标题栏 -->
+<div class="header">
+    <div class="back-btn">
+        <img src="./Icons/left.svg" alt="返回" class="back-icon">
+    </div>
+    <div class="title">远程控制平台</div>
+</div>
+
+<!-- 主内容区域 -->
+<div class="content">
+    <datalist id="ip-suggestions">
+        <!-- 选项将通过JavaScript动态生成 -->
+    </datalist>
+    <!-- 主页 -->
+    <div id="home-page" class="page active">
+        <div class="home-buttons">
+            <button class="home-btn" data-target="send-message-page">发送消息</button>
+            <button class="home-btn" data-target="end-message-page">结束消息</button>
+            <button class="home-btn" data-target="send-cmd-page">发送cmd命令</button>
+        </div>
+    </div>
+
+    <!-- 发送消息页面 -->
+    <div id="send-message-page" class="page">
+        <div class="form-group">
+            <label for="target-ip">输入目标IP/提示词：</label>
+            <input type="text" id="target-ip" list="ip-suggestions" placeholder="请输入目标IP或提示词">
+        </div>
+
+        <div class="form-group">
+            <label for="message-content">输入要发送的消息：</label>
+            <input type="text" id="message-content" placeholder="请输入要发送的消息">
+        </div>
+
+        <div class="form-group">
+            <label for="display-seconds">显示秒数（选填）：</label>
+            <input type="number" id="display-seconds" placeholder="请输入显示秒数">
+        </div>
+
+        <div class="form-group">
+            <label>选择显示模式：</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="mode1" name="display-mode" value="marquee">
+                    <label for="mode1">跑马灯模式</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="mode2" name="display-mode" value="announcement">
+                    <label for="mode2">公告模式</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="mode3" name="display-mode" value="typewriter">
+                    <label for="mode3">打字机模式</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="mode4" name="display-mode" value="blink">
+                    <label for="mode4">闪烁模式</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="mode5" name="display-mode" value="fullscreen">
+                    <label for="mode5">全屏模式</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>是否允许接收端手动关闭此消息窗口？</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="close-yes" name="allow-close" value="yes">
+                    <label for="close-yes">是</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="close-no" name="allow-close" value="no">
+                    <label for="close-no">否</label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" id="send-message-btn">发送消息</button>
+    </div>
+
+    <!-- 结束消息页面 -->
+    <div id="end-message-page" class="page">
+        <div class="form-group">
+            <label for="end-target-ip">输入目标IP/提示词：</label>
+            <input type="text" id="end-target-ip" list="ip-suggestions" placeholder="请输入目标IP或提示词">
+        </div>
+
+        <button class="btn" id="end-message-btn">结束消息</button>
+    </div>
+
+    <!-- 发送cmd命令页面 -->
+    <div id="send-cmd-page" class="page">
+        <div class="form-group">
+            <label for="cmd-target-ip">输入目标IP/提示词：</label>
+            <input type="text" id="cmd-target-ip" list="ip-suggestions" placeholder="请输入目标IP或提示词">
+        </div>
+
+        <div class="form-group">
+            <label for="cmd-command">输入cmd命令：</label>
+            <input type="text" id="cmd-command" placeholder="请输入cmd命令">
+        </div>
+
+        <div class="form-group">
+            <label>选择执行权限：</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="permission-system" name="cmd-permission" value="system">
+                    <label for="permission-system">系统权限</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="permission-user" name="cmd-permission" value="user">
+                    <label for="permission-user">用户权限</label>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" id="send-cmd-btn">发送cmd命令</button>
+    </div>
+
+    <!-- 各种结果页面 -->
+    <div id="send-message-success" class="page result-page">
+        <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>对方已确认收到消息</h2>
+    </div>
+
+    <div id="send-message-failure" class="page result-page">
+        <img src="Icons/x.svg" alt="失败" class="result-icon failure">
+        <h2>消息发送失败</h2>
+    </div>
+
+    <div id="end-message-success" class="page result-page">
+        <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>消息结束成功</h2>
+    </div>
+
+    <div id="end-message-failure" class="page result-page">
+       <img src="Icons/x.svg" alt="失败" class="result-icon failure">
+        <h2>消息结束失败</h2>
+    </div>
+
+    <div id="send-cmd-success" class="page result-page">
+        <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>cmd命令执行成功</h2>
+    </div>
+
+    <div id="send-cmd-failure" class="page result-page">
+        <img src="Icons/x.svg" alt="失败" class="result-icon failure">
+        <h2>cmd命令执行失败</h2>
+    </div>
+
+    <!-- 等待页面 -->
+    <div id="waiting-page" class="page result-page">
+        <img src="Icons/cast.svg" alt="等待" class="result-icon waiting">
+        <h2>消息已发送，等待对方接收...</h2>
+    </div>
+
+    <!-- 超时页面 -->
+    <div id="timeout-page" class="page result-page">
+        <img src="Icons/clock.svg" alt="超时" class="result-icon timeout">
+        <h2>消息已发出，未收到对方确认</h2>
+    </div>
+
+    <!-- 警告页面 -->
+    <div id="warning-page" class="page result-page">
+        <img src="Icons/alert.svg" alt="警告" class="result-icon warning">
+        <h2>发生错误</h2>
+    </div>
+
+    <!-- 我的页面 -->
+    <div id="me-page" class="page">
+        <div class="user-info" id="user-details-btn">
+            <div class="user-details">
+                <div class="username" id="current-username">默认用户</div>
+                <div class="ip-list" id="ip-list-display">
+                    <!-- IP地址将通过JavaScript动态填充 -->
+                </div>
+            </div>
+            <!-- 添加右侧箭头图标 -->
+            <img src="Icons/right.svg" alt="" class="right-arrow">
+        </div>
+
+        <div class="menu-buttons">
+            <button class="menu-btn" data-target="keywords-page">
+                <img src="Icons/list.svg" alt="设置提示词" class="btn-icon">
+                设置提示词
+                <img src="Icons/push.svg" alt="" class="push-icon">
+            </button>
+            <button class="menu-btn" data-target="sun-moon-page">
+                <img src="Icons/sun-moon.svg" alt="显示模式" class="btn-icon">
+                显示模式
+                <img src="Icons/push.svg" alt="" class="push-icon">
+            </button>
+            <button class="menu-btn" data-target="about-page">
+                <img src="Icons/info.svg" alt="关于" class="btn-icon">
+                关于
+                <img src="Icons/push.svg" alt="" class="push-icon">
+            </button>
+        </div>
+    </div>
+
+    <!-- 关于页面 -->
+    <div id="about-page" class="page about-page">
+        <div class="about-header">
+            <img src="Icons/remotecontrol.png" alt="远程控制平台" class="about-logo">
+            <div class="about-title">远程控制平台</div>
+            <div class="about-version">版本 3.2.0</div>
+            <div class="about-author">作者：StackNi</div>
+            <button class="btn" id="check-update-btn" style="margin-top: 15px; width: auto; padding: 8px 25px; display: inline-block;">检查更新</button>
+        </div>
+
+        <div class="about-section">
+            <h3>项目简介</h3>
+            <p>这是一款基于 UDP 协议的局域网远程通信与控制工具。不需要联网，不需要注册账号，只要两台设备在同一局域网内，就能互相发送消息、执行命令。</p>
+        </div>
+
+        <div class="about-section">
+            <h3>项目主页</h3>
+            <div onclick="window.Android.openUrl('https://github.com/StackNi/remote-control-platform/')"
+                 style="color: #0366d6; text-decoration: underline; word-break: break-all; cursor: pointer;">
+                https://github.com/StackNi/remote-control-platform/
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h3>软件官网</h3>
+            <div onclick="window.Android.openUrl('https://stackni.github.io/remote-control-platform/')"
+                 style="color: #0366d6; text-decoration: underline; word-break: break-all; cursor: pointer;">
+                https://stackni.github.io/remote-control-platform/
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h3>功能特性</h3>
+            <ul class="feature-list">
+                <li><strong>发送大屏消息：</strong>支持跑马灯、打字机、闪烁、公告、全屏等多种显示模式，可自定义持续时间，适配不同场景需求。</li>
+                <li><strong>远程执行 CMD 命令：</strong>支持系统权限和用户权限两种执行方式，适配教学机房和办公环境。</li>
+                <li><strong>智能提示词系统：</strong>可为常用 IP 设置提示词（如"教室主机""办公室电脑"），发送时直接选择即可，无需手动输 IP。</li>
+                <li><strong>精细化的消息状态反馈：</strong>发送后实时显示对方是否确认收到，支持超时提示和错误状态分类展示。</li>
+                <li><strong>支持跨平台：</strong>发送端已推出 Windows 桌面版（带交互界面）和 Android 版；接收端目前仅限 Windows。</li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h3>使用说明</h3>
+            <ul class="feature-list">
+                <li>发送端与接收端需处于同一局域网。</li>
+                <li>接收端目前仅支持 Windows 系统。</li>
+                <li>建议目标设备使用固定 IP，或通过提示词系统提前绑定，便于日常操作。</li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h3>免责声明</h3>
+            <p>本工具仅限在互相知晓并同意的局域网环境下使用，请勿用于未经授权的设备或恶作剧行为。作者不对因滥用或误用本工具所造成的任何后果承担责任。请合理使用，共同维护良好的网络环境。</p>
+        </div>
+
+        <div class="about-section">
+            <h3>适用场景</h3>
+            <ul class="feature-list">
+                <li>教室多媒体消息推送</li>
+                <li>机房统一管理</li>
+                <li>办公室内部快速通信</li>
+                <li>局域网内轻量级控制</li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h3>关于作者</h3>
+            <p>现为高三学生，课余时间独立开发。如果您觉得这个工具在课堂上或办公室里对您有帮助，欢迎在 GitHub 上给个 Star。</p>
+            <img src="Icons/afdian.png" alt="支持作者" class="donate-image">
+            <img src="Icons/wechat.png" alt="支持作者" class="donate-image">
+            <p style="margin-top: 8px;">如果有反馈建议，欢迎加群交流：<br>QQ 群：1053383479</p>
+            <img src="Icons/qqgroup.jpg" alt="QQ群二维码" class="donate-image">
+        </div>
+    </div>
+
+    <!-- 显示模式设置页面 -->
+    <div id="sun-moon-page" class="page">
+        <div class="form-group">
+            <label>选择显示模式：</label>
+            <div class="radio-option">
+                <input type="radio" id="theme-auto" name="theme" value="auto" checked>
+                <label for="theme-auto">跟随系统</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" id="theme-light" name="theme" value="light">
+                <label for="theme-light">浅色模式</label>
+            </div>
+            <div class="radio-option">
+                <input type="radio" id="theme-dark" name="theme" value="dark">
+                <label for="theme-dark">深色模式</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 更改用户名页面 -->
+    <div id="change-username-page" class="page">
+        <div class="form-group">
+            <label for="new-username">输入新用户名：</label>
+            <input type="text" id="new-username" placeholder="请输入新用户名">
+        </div>
+        <button class="btn" id="save-username-btn">保存更改</button>
+    </div>
+
+    <!-- 用户名更改成功页面 -->
+    <div id="username-change-success" class="page result-page">
+        <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>用户名更改成功</h2>
+    </div>
+
+    <!-- 设置提示词页面 -->
+    <div id="keywords-page" class="page">
+        <div class="keyword-list">
+            <div class="keyword-item keyword-default">
+                <div class="keyword-title">本地回环</div>
+                <div class="keyword-ip">IP: 127.0.0.1</div>
+            </div>
+        </div>
+        <button class="btn btn-add" id="add-keyword-btn">+</button>
+    </div>
+
+    <!-- 操作提示词页面 -->
+    <div id="keyword-operation-page" class="page">
+        <div class="info-display">
+            <div class="info-item">
+                <div class="info-label">IP地址</div>
+                <div class="info-value" id="keyword-ip-display"></div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">提示词</div>
+                <div class="info-value" id="keyword-name-display"></div>
+            </div>
+        </div>
+        <div class="dual-buttons">
+            <button class="btn" id="modify-keyword-btn">修改提示词</button>
+            <button class="btn btn-danger" id="delete-keyword-btn">删除提示词</button>
+        </div>
+    </div>
+
+    <!-- 修改提示词页面 -->
+    <div id="modify-keyword-page" class="page">
+        <div class="form-group">
+            <label for="modified-keyword">输入新的提示词：</label>
+            <input type="text" id="modified-keyword" placeholder="请输入新的提示词">
+        </div>
+        <button class="btn" id="save-modified-keyword-btn">保存修改</button>
+    </div>
+
+    <!-- 修改提示词成功页面 -->
+    <div id="keyword-modify-success" class="page result-page">
+       <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>提示词修改成功</h2>
+    </div>
+
+    <!-- 添加提示词页面 -->
+    <div id="add-keyword-page" class="page">
+        <div class="form-group">
+            <label for="new-keyword">输入提示词：</label>
+            <input type="text" id="new-keyword" placeholder="请输入提示词">
+        </div>
+        <div class="form-group">
+            <label for="new-keyword-ip">输入对应IP地址：</label>
+            <input type="text" id="new-keyword-ip" placeholder="请输入IP地址">
+        </div>
+        <button class="btn" id="save-new-keyword-btn">添加提示词</button>
+    </div>
+
+    <!-- 添加提示词结果页面 -->
+    <div id="keyword-add-success" class="page result-page">
+       <img src="Icons/ok.svg" alt="成功" class="result-icon success">
+        <h2>添加成功</h2>
+    </div>
+
+    <div id="keyword-add-failure" class="page result-page">
+        <img src="Icons/x.svg" alt="失败" class="result-icon failure">
+        <h2>添加失败</h2>
+        <p>请检查输入内容</p>
+    </div>
+</div>
+
+<!-- 底部导航栏 -->
+<div class="footer">
+    <div class="nav-item active" data-target="home-page">
+        <img src="Icons/home.svg" alt="首页" class="nav-icon">
+        <span class="nav-label">首页</span>
+    </div>
+    <div class="nav-item" data-target="me-page">
+        <img src="Icons/me.svg" alt="我的" class="nav-icon">
+        <span class="nav-label">我的</span>
+    </div>
+</div>
+
+<script>
+// 页面导航和状态管理
+(function() {
+    'use strict';
+
+    // ==================== 设备GUID管理 ====================
+    window._deviceGUID = '';
+    window._setDeviceGUID = function(guid) {
+        window._deviceGUID = guid;
+        console.log('设备GUID已设置:', guid);
+    };
+
+    // ==================== UUID生成器 ====================
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0;
+            var v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // ==================== JSON消息构建（新协议） ====================
+    function buildMessageJSON(username, content, duration, displayMode) {
+        return JSON.stringify({
+            type: 'message',
+            deviceGUID: window._deviceGUID || '',
+            username: username,
+            content: content,
+            duration: duration,
+            displayMode: displayMode,
+            requestID: generateUUID()
+        });
+    }
+
+    function buildCloseJSON(username) {
+        return JSON.stringify({
+            type: 'close',
+            deviceGUID: window._deviceGUID || '',
+            username: username,
+            requestID: generateUUID()
+        });
+    }
+
+    function buildCmdJSON(username, command, permission) {
+        return JSON.stringify({
+            type: 'cmd',
+            deviceGUID: window._deviceGUID || '',
+            username: username,
+            command: command,
+            permission: permission,
+            requestID: generateUUID()
+        });
+    }
+
+    // ==================== 检查更新弹窗的全局函数定义 ====================
+    window.showCustomUpdateDialog = function(data) {
+        const existingDialog = document.getElementById('custom-update-dialog');
+        if (existingDialog) return;
+
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            pointer-events: auto;
+            transition: background-color 0.2s ease;
+        `;
+        overlay._closing = false;
+
+        const dialog = document.createElement('div');
+        dialog.id = 'custom-update-dialog';
+        dialog.style.cssText = `
+            background-color: ${document.body.classList.contains('night-mode') ? '#2d2d2d' : 'white'};
+            color: ${document.body.classList.contains('night-mode') ? '#e0e0e0' : '#333'};
+            border-radius: 12px;
+            padding: 20px 20px 24px 20px;
+            max-width: 80%;
+            width: 320px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            opacity: 0;
+            transform: scale(0.95);
+        `;
+
+        const title = document.createElement('h3');
+        title.style.cssText = `
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: ${document.body.classList.contains('night-mode') ? '#bb86fc' : '#3700B3'};
+        `;
+        title.textContent = data.isMajorUpdate ? '全新版本 v' + data.latestVersion : '发现新版本 v' + data.latestVersion;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+            max-height: 300px;
+            overflow-y: auto;
+        `;
+        let contentHtml = '';
+        if (data.publishDate) contentHtml += '<p><strong>发布时间：</strong>' + data.publishDate + '</p>';
+        contentHtml += '<p><strong>更新内容：</strong></p>';
+        contentHtml += '<p style="white-space: pre-line;">' + data.releaseNotes + '</p>';
+        contentHtml += '<p><strong>当前版本：</strong>v' + data.currentVersion + '</p>';
+        content.innerHTML = contentHtml;
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.cssText = 'display: flex; justify-content: space-between; gap: 10px;';
+
+        if (data.isMajorUpdate) {
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = '立即更新';
+            downloadBtn.className = 'btn';
+            downloadBtn.style.cssText = 'flex: 1; padding: 10px; margin: 0; cursor: pointer; transition: all 0.1s ease; height: 43px;';
+            downloadBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (window.Android && typeof Android.downloadApkSilent === 'function') {
+                    Android.downloadApkSilent(data.downloadUrl);
+                } else if (window.Android && typeof Android.downloadWithBrowser === 'function') {
+                    Android.downloadWithBrowser(data.downloadUrl);
+                } else {
+                    window.open(data.downloadUrl, '_blank');
+                }
+            };
+            buttonContainer.appendChild(downloadBtn);
+        } else {
+            const laterBtn = document.createElement('button');
+            laterBtn.textContent = '以后再说';
+            laterBtn.className = 'btn btn-later';
+            laterBtn.style.cssText = 'flex: 1; padding: 10px; margin: 0; cursor: pointer; transition: all 0.1s ease; height: 43px;';
+            laterBtn.onclick = function(e) {
+                e.stopPropagation();
+                closeDialogWithAnimation(overlay, dialog);
+            };
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = '下载更新';
+            downloadBtn.className = 'btn';
+            downloadBtn.style.cssText = 'flex: 1; padding: 10px; margin: 0; cursor: pointer; transition: all 0.1s ease; height: 43px;';
+            downloadBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (window.Android && typeof Android.downloadApkSilent === 'function') {
+                    Android.downloadApkSilent(data.downloadUrl);
+                } else if (window.Android && typeof Android.downloadWithBrowser === 'function') {
+                    Android.downloadWithBrowser(data.downloadUrl);
+                } else {
+                    window.open(data.downloadUrl, '_blank');
+                }
+                closeDialogWithAnimation(overlay, dialog);
+            };
+            buttonContainer.appendChild(laterBtn);
+            buttonContainer.appendChild(downloadBtn);
+            overlay.onclick = function(e) {
+                if (e.target === overlay) closeDialogWithAnimation(overlay, dialog);
+            };
+        }
+
+        dialog.appendChild(title);
+        dialog.appendChild(content);
+        dialog.appendChild(buttonContainer);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+                dialog.style.opacity = '1';
+                dialog.style.transform = 'scale(1)';
+            });
+        });
+    };
+
+    function closeDialogWithAnimation(overlay, dialog) {
+        if (overlay._closing) return;
+        overlay._closing = true;
+        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+        dialog.style.opacity = '0';
+        dialog.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            if (overlay && overlay.remove) overlay.remove();
+        }, 200);
+    }
+
+    // 页面标题映射
+    const pageTitles = {
+        'home-page': '远程控制平台',
+        'send-message-page': '发送消息',
+        'end-message-page': '结束消息',
+        'send-cmd-page': '发送cmd命令',
+        'send-message-success': '消息发送成功',
+        'send-message-failure': '消息发送失败',
+        'end-message-success': '消息结束成功',
+        'end-message-failure': '消息结束失败',
+        'send-cmd-success': '命令执行成功',
+        'send-cmd-failure': '命令执行失败',
+        'me-page': '我的',
+        'change-username-page': '更改用户名',
+        'username-change-success': '更改成功',
+        'keywords-page': '设置提示词',
+        'keyword-operation-page': '操作提示词',
+        'modify-keyword-page': '修改提示词',
+        'keyword-modify-success': '修改成功',
+        'add-keyword-page': '添加提示词',
+        'keyword-add-success': '添加成功',
+        'about-page': '关于',
+        'keyword-add-failure': '添加失败',
+        'sun-moon-page': '显示模式',
+        'waiting-page': '请稍候',
+        'timeout-page': '操作超时',
+        'warning-page': '操作警告'
+    };
+
+    // 不需要返回按钮的页面
+    const noBackBtnPages = [
+        'home-page', 'me-page', 'send-message-success', 'send-message-failure',
+        'end-message-success', 'end-message-failure', 'send-cmd-success',
+        'send-cmd-failure', 'username-change-success', 'keyword-modify-success',
+        'keyword-add-success', 'keyword-add-failure',
+        'waiting-page', 'timeout-page', 'warning-page'
+    ];
+
+    // 需要隐藏底部导航的页面
+    const hideFooterPages = [
+        'send-message-page', 'end-message-page', 'send-cmd-page',
+        'send-message-success', 'send-message-failure', 'end-message-success',
+        'end-message-failure', 'send-cmd-success', 'send-cmd-failure',
+        'change-username-page', 'username-change-success', 'keywords-page',
+        'keyword-operation-page', 'modify-keyword-page', 'keyword-modify-success',
+        'add-keyword-page', 'keyword-add-success', 'keyword-add-failure',
+        'about-page', 'sun-moon-page',
+        'waiting-page', 'timeout-page', 'warning-page'
+    ];
+
+    // 临时页面（不应该被记录在历史中）
+    const temporaryPages = [
+        'send-message-success', 'send-message-failure', 'end-message-success',
+        'end-message-failure', 'send-cmd-success', 'send-cmd-failure',
+        'username-change-success', 'keyword-modify-success', 'keyword-add-success',
+        'keyword-add-failure',
+        'waiting-page', 'timeout-page', 'warning-page'
+    ];
+
+    // DOM元素引用
+    const pages = document.querySelectorAll('.page');
+    const navItems = document.querySelectorAll('.nav-item');
+    const backBtn = document.querySelector('.back-btn');
+    const title = document.querySelector('.title');
+    const homeButtons = document.querySelectorAll('.home-btn');
+    const menuButtons = document.querySelectorAll('.menu-btn');
+    const footer = document.querySelector('.footer');
+    const content = document.querySelector('.content');
+
+    // 用户信息相关
+    const userDetailsBtn = document.getElementById('user-details-btn');
+    const currentUsername = document.getElementById('current-username');
+    const ipListDisplay = document.getElementById('ip-list-display');
+    const newUsernameInput = document.getElementById('new-username');
+    const saveUsernameBtn = document.getElementById('save-username-btn');
+
+    // 提示词相关
+    const keywordItems = document.querySelectorAll('.keyword-item');
+    const addKeywordBtn = document.getElementById('add-keyword-btn');
+    const keywordIpDisplay = document.getElementById('keyword-ip-display');
+    const keywordNameDisplay = document.getElementById('keyword-name-display');
+    const modifyKeywordBtn = document.getElementById('modify-keyword-btn');
+    const deleteKeywordBtn = document.getElementById('delete-keyword-btn');
+    const modifiedKeywordInput = document.getElementById('modified-keyword');
+    const saveModifiedKeywordBtn = document.getElementById('save-modified-keyword-btn');
+    const newKeywordInput = document.getElementById('new-keyword');
+    const newKeywordIpInput = document.getElementById('new-keyword-ip');
+    const saveNewKeywordBtn = document.getElementById('save-new-keyword-btn');
+
+    // 表单元素
+    const sendMessageBtn = document.getElementById('send-message-btn');
+    const endMessageBtn = document.getElementById('end-message-btn');
+    const sendCmdBtn = document.getElementById('send-cmd-btn');
+
+    // 页面历史记录
+    let pageHistory = [];
+    let isAutoRedirect = false;
+
+    // 当前操作的提示词数据
+    let currentKeywordData = {};
+
+    // 配置数据
+    let FUsername = '默认用户';
+    let FIPTips = new Map();
+
+    // ==================== 主题管理 ====================
+    function getCurrentTheme() {
+        return localStorage.getItem('theme') || 'auto';
+    }
+
+    function applyTheme(theme) {
+        let actualTheme = theme;
+
+        if (theme === 'auto') {
+            if (window.Android && typeof Android.getSystemTheme === 'function') {
+                actualTheme = Android.getSystemTheme();
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                actualTheme = 'dark';
+            } else {
+                actualTheme = 'light';
+            }
+        }
+
+        if (actualTheme === 'dark') {
+            document.body.classList.add('night-mode');
+        } else {
+            document.body.classList.remove('night-mode');
+        }
+
+        localStorage.setItem('theme', theme);
+
+        if (window.Android && typeof Android.setThemeMode === 'function') {
+            Android.setThemeMode(actualTheme);
+        }
+    }
+
+    function initThemeMode() {
+        const savedTheme = getCurrentTheme();
+        const radio = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+        if (radio) radio.checked = true;
+        applyTheme(savedTheme);
+
+        // 主题模式单选按钮事件
+        const themeRadios = document.querySelectorAll('input[name="theme"]');
+        themeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                applyTheme(this.value);
+            });
+        });
+    }
+
+    // ==================== 数据管理 ====================
+    function updateDatalistOptions() {
+        const datalists = document.querySelectorAll('datalist');
+        datalists.forEach(datalist => {
+            datalist.innerHTML = '';
+            FIPTips.forEach((ip, keyword) => {
+                if (keyword !== '本地回环') {
+                    const option = document.createElement('option');
+                    option.value = keyword;
+                    option.textContent = `${keyword}`;
+                    datalist.appendChild(option);
+                }
+            });
+        });
+    }
+
+    function loadData() {
+        // 加载用户名
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+            FUsername = savedUsername;
+            currentUsername.textContent = FUsername;
+        }
+
+        // 清空并添加默认提示词
+        FIPTips.clear();
+        FIPTips.set('本地回环', '127.0.0.1');
+
+        // 加载保存的提示词
+        const savedKeywords = localStorage.getItem('keywords');
+        if (savedKeywords) {
+            try {
+                const keywords = JSON.parse(savedKeywords);
+                const keywordList = document.querySelector('.keyword-list');
+                const existingItems = keywordList.querySelectorAll('.keyword-item:not(.keyword-default)');
+                existingItems.forEach(item => item.remove());
+
+                keywords.forEach(keyword => {
+                    const keywordItem = createKeywordItem(keyword.name, keyword.ip);
+                    keywordList.appendChild(keywordItem);
+                    FIPTips.set(keyword.name, keyword.ip);
+                });
+            } catch (error) {
+                console.error('解析保存的提示词失败:', error);
+            }
+        }
+
+        updateDatalistOptions();
+    }
+
+    function createKeywordItem(name, ip) {
+        const keywordItem = document.createElement('div');
+        keywordItem.className = 'keyword-item keyword-normal';
+        keywordItem.setAttribute('data-keyword', name);
+        keywordItem.setAttribute('data-ip', ip);
+        keywordItem.innerHTML = `
+            <div class="keyword-title">${name}</div>
+            <div class="keyword-ip">IP: ${ip}</div>
+        `;
+
+        keywordItem.addEventListener('click', function() {
+            currentKeywordData = {
+                keyword: this.getAttribute('data-keyword'),
+                ip: this.getAttribute('data-ip')
+            };
+            keywordIpDisplay.textContent = currentKeywordData.ip;
+            keywordNameDisplay.textContent = currentKeywordData.keyword;
+            showPage('keyword-operation-page');
+        });
+
+        return keywordItem;
+    }
+
+    function saveTipsConfig() {
+        try {
+            const keywords = [];
+            for (let [name, ip] of FIPTips) {
+                if (name !== '本地回环') {
+                    keywords.push({ name, ip });
+                }
+            }
+            localStorage.setItem('keywords', JSON.stringify(keywords));
+            updateDatalistOptions();
+            return true;
+        } catch (error) {
+            console.error('保存提示词配置失败:', error);
+            return false;
+        }
+    }
+
+    // ==================== 网络功能（新协议：JSON格式） ====================
+    function isValidIPAddress(ip) {
+        if (!ip || ip.trim() === '') return false;
+        ip = ip.trim();
+        const parts = ip.split('.');
+        if (parts.length !== 4) return false;
+        for (let i = 0; i < 4; i++) {
+            const part = parts[i];
+            if (part === '') return false;
+            for (let j = 0; j < part.length; j++) {
+                const ch = part.charAt(j);
+                if (ch < '0' || ch > '9') return false;
+            }
+            if (part.length > 1 && part.charAt(0) === '0') return false;
+            const num = parseInt(part, 10);
+            if (isNaN(num) || num < 0 || num > 255) return false;
+        }
+        return true;
+    }
+
+    function resolveTargetIP(input) {
+        if (isValidIPAddress(input)) return input;
+        if (FIPTips.has(input)) return FIPTips.get(input);
+        return '';
+    }
+
+    /**
+     * 通过Android接口发送UDP消息（新协议：JSON格式）
+     * @param {string} ipAddress 目标IP
+     * @param {number} port 目标端口（0表示让Java端自动选择）
+     * @param {string} jsonData JSON格式的消息数据
+     * @returns {Promise<{success: boolean, message: string}>}
+     */
+    async function sendMessageViaAndroid(ipAddress, port, jsonData) {
+        return new Promise((resolve) => {
+            try {
+                if (window.Android && typeof window.Android.sendUdpMessage === 'function') {
+                    const result = window.Android.sendUdpMessage(ipAddress, port, jsonData);
+                    resolve({
+                        success: result === 'SUCCESS',
+                        message: result || '发送失败'
+                    });
+                } else {
+                    resolve({
+                        success: false,
+                        message: '安卓UDP服务不可用'
+                    });
+                }
+            } catch (error) {
+                resolve({
+                    success: false,
+                    message: '发送失败：' + (error.message || '未知错误')
+                });
+            }
+        });
+    }
+
+    // ==================== 检查和更新IP功能 ====================
+    async function checkAndUpdateIP() {
+        return new Promise((resolve) => {
+            try {
+                if (window.Android && typeof Android.getAndCheckLocalIP === 'function') {
+                    const ipResult = Android.getAndCheckLocalIP();
+                    updateIPDisplay(ipResult);
+                    if (ipResult.startsWith('ERROR:') || ipResult.includes('未知IP') || ipResult.trim() === '') {
+                        resolve({
+                            success: false,
+                            message: '未找到可用IP，请检查网络设置'
+                        });
+                    } else {
+                        resolve({
+                            success: true,
+                            ip: ipResult
+                        });
+                    }
+                } else {
+                    const currentIP = getLocalIPAddress();
+                    updateIPDisplay(currentIP);
+                    if (currentIP === '未知' || currentIP.trim() === '') {
+                        resolve({
+                            success: false,
+                            message: '未找到可用IP，请检查网络设置'
+                        });
+                    } else {
+                        resolve({
+                            success: true,
+                            ip: currentIP
+                        });
+                    }
+                }
+            } catch (error) {
+                updateIPDisplay('网络连接异常');
+                resolve({
+                    success: false,
+                    message: '检查IP失败：' + (error.message || '未知错误')
+                });
+            }
+        });
+    }
+
+    function updateIPDisplay(ip) {
+        if (ipListDisplay) {
+            ipListDisplay.innerHTML = '';
+            if (!ip || ip.trim() === '' || ip.startsWith('ERROR:') || ip.includes('未知IP')) {
+                const ipItem = document.createElement('div');
+                ipItem.className = 'ip-item';
+                ipItem.textContent = '本机IP：未知（请检查网络设置）';
+                ipListDisplay.appendChild(ipItem);
+            } else if (ip === '网络连接异常') {
+                const ipItem = document.createElement('div');
+                ipItem.className = 'ip-item';
+                ipItem.textContent = '本机IP：网络连接异常';
+                ipListDisplay.appendChild(ipItem);
+            } else {
+                const ipLines = ip.split('\n');
+                ipLines.forEach(ipLine => {
+                    if (ipLine.trim()) {
+                        const ipItem = document.createElement('div');
+                        ipItem.className = 'ip-item';
+                        ipItem.textContent = '本机IP：' + ipLine;
+                        ipListDisplay.appendChild(ipItem);
+                    }
+                });
+            }
+        }
+    }
+
+    function getLocalIPAddress() {
+        if (window.Android && typeof Android.getLocalIP === 'function') {
+            return Android.getLocalIP();
+        }
+        return '未知';
+    }
+
+    function initIPDisplay() {
+        const ips = getLocalIPAddress();
+        updateIPDisplay(ips);
+    }
+
+    // ==================== 页面导航 ====================
+    function showPage(pageId, fromBack = false) {
+        const currentPage = document.querySelector('.page.active');
+        const currentPageId = currentPage ? currentPage.id : '';
+
+        if (currentPageId === pageId) return;
+
+        if (!fromBack && !temporaryPages.includes(pageId) && !isAutoRedirect) {
+            if (currentPage && !temporaryPages.includes(currentPageId)) {
+                if (pageHistory.length === 0 || pageHistory[pageHistory.length - 1] !== currentPageId) {
+                    pageHistory.push(currentPageId);
+                }
+            }
+        }
+
+        pages.forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        title.textContent = pageTitles[pageId] || '远程控制平台';
+
+        backBtn.style.display = noBackBtnPages.includes(pageId) ? 'none' : 'block';
+
+        if (hideFooterPages.includes(pageId)) {
+            footer.style.display = 'none';
+            content.style.marginBottom = '0';
+        } else {
+            footer.style.display = 'flex';
+            content.style.marginBottom = '70px';
+        }
+
+        navItems.forEach(item => {
+            if (item.getAttribute('data-target') === pageId) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        isAutoRedirect = false;
+    }
+
+    window.showPage = showPage;
+
+    function redirectTo(pageId) {
+        isAutoRedirect = true;
+        showPage(pageId);
+    }
+
+    function goBack() {
+        if (pageHistory.length > 0) {
+            const prevPage = pageHistory.pop();
+            showPage(prevPage, true);
+        } else {
+            showPage('home-page');
+        }
+    }
+
+    // ==================== 业务逻辑（新协议） ====================
+
+    // 发送消息
+    async function sendMessageFunction() {
+        const targetIpInput = document.getElementById('target-ip');
+        const messageContent = document.getElementById('message-content');
+        const displaySeconds = document.getElementById('display-seconds');
+        const displayModeRadios = document.getElementsByName('display-mode');
+        const allowCloseRadios = document.getElementsByName('allow-close');
+
+        const input = targetIpInput.value.trim();
+        const message = messageContent.value.trim();
+        const duration = displaySeconds.value.trim() || '-1';
+
+        if (!input) {
+            alert('请输入目标IP地址或提示词！');
+            return;
+        }
+
+        const ipCheck = await checkAndUpdateIP();
+        if (!ipCheck.success) {
+            alert(ipCheck.message);
+            return;
+        }
+
+        const targetIP = resolveTargetIP(input);
+        if (!targetIP) {
+            alert('请输入有效的IPv4地址或提示词！');
+            return;
+        }
+
+        if (!message) {
+            alert('消息不能为空！');
+            return;
+        }
+
+        const username = FUsername || '默认用户';
+
+        let displayMode = 'MARQUEE';
+        for (let radio of displayModeRadios) {
+            if (radio.checked) {
+                const value = radio.value;
+                if (value === 'announcement') displayMode = 'NORMAL';
+                else if (value === 'typewriter') displayMode = 'TYPEWRITER';
+                else if (value === 'blink') displayMode = 'BLINK';
+                else if (value === 'fullscreen') displayMode = 'FULLSCREEN';
+                break;
+            }
+        }
+
+        for (let radio of allowCloseRadios) {
+            if (radio.checked && radio.value === 'no') {
+                displayMode += '_NOCLOSE';
+                break;
+            }
+        }
+
+        // 构建JSON消息（新协议）
+        const jsonData = buildMessageJSON(username, message, duration, displayMode);
+
+        // port传0，让Java端自动选择端口（消息使用25105）
+        const result = await sendMessageViaAndroid(targetIP, 0, jsonData);
+
+        if (result.success) {
+            document.querySelector('#waiting-page h2').textContent = '消息已发送，等待对方接收...';
+            showPage('waiting-page');
+        } else {
+            // 显示失败页面
+            const failPage = document.getElementById('send-message-failure');
+            const pElem = failPage.querySelector('p');
+            if (pElem) pElem.textContent = result.message;
+            showPage('send-message-failure');
+        }
+    }
+
+    // 结束消息
+    async function closeRemoteWindows() {
+        const endTargetIp = document.getElementById('end-target-ip');
+        const input = endTargetIp.value.trim();
+
+        if (!input) {
+            alert('请输入目标IP地址或提示词！');
+            return;
+        }
+
+        const ipCheck = await checkAndUpdateIP();
+        if (!ipCheck.success) {
+            alert(ipCheck.message);
+            return;
+        }
+
+        const targetIP = resolveTargetIP(input);
+        if (!targetIP) {
+            alert('请输入有效的IPv4地址或提示词！');
+            return;
+        }
+
+        const username = FUsername || '默认用户';
+        const jsonData = buildCloseJSON(username);
+
+        const result = await sendMessageViaAndroid(targetIP, 0, jsonData);
+
+        if (result.success) {
+            document.querySelector('#waiting-page h2').textContent = '结束命令已发送，等待对方响应...';
+            showPage('waiting-page');
+        } else {
+            const failPage = document.getElementById('end-message-failure');
+            const pElem = failPage.querySelector('p');
+            if (pElem) pElem.textContent = result.message;
+            showPage('end-message-failure');
+        }
+    }
+
+    // 发送cmd命令
+    async function sendCmdCommand() {
+        const cmdTargetIp = document.getElementById('cmd-target-ip');
+        const cmdCommand = document.getElementById('cmd-command');
+        const permissionRadios = document.getElementsByName('cmd-permission');
+
+        const input = cmdTargetIp.value.trim();
+        const command = cmdCommand.value.trim();
+
+        if (!input) {
+            alert('请输入目标IP地址或提示词！');
+            return;
+        }
+
+        const ipCheck = await checkAndUpdateIP();
+        if (!ipCheck.success) {
+            alert(ipCheck.message);
+            return;
+        }
+
+        const targetIP = resolveTargetIP(input);
+        if (!targetIP) {
+            alert('请输入有效的IPv4地址或提示词！');
+            return;
+        }
+
+        if (!command) {
+            alert('命令不能为空！');
+            return;
+        }
+
+        let permission = 'SYSTEM';
+        for (let radio of permissionRadios) {
+            if (radio.checked && radio.value === 'user') {
+                permission = 'USER';
+                break;
+            }
+        }
+
+        const username = FUsername || '默认用户';
+        const jsonData = buildCmdJSON(username, command, permission);
+
+        // port传0，让Java端根据permission自动选择端口
+        // SYSTEM → 25106, USER → 25105
+        const result = await sendMessageViaAndroid(targetIP, 0, jsonData);
+
+        if (result.success) {
+            document.querySelector('#waiting-page h2').textContent = 'cmd命令已发送，等待执行结果...';
+            showPage('waiting-page');
+        } else {
+            const failPage = document.getElementById('send-cmd-failure');
+            const pElem = failPage.querySelector('p');
+            if (pElem) pElem.textContent = result.message;
+            showPage('send-cmd-failure');
+        }
+    }
+
+    // ==================== 红点功能 ====================
+    function addRedDotToAboutMenu() {
+        const aboutMenuBtn = Array.from(document.querySelectorAll('.menu-btn')).find(btn => 
+            btn.getAttribute('data-target') === 'about-page'
+        );
+        if (aboutMenuBtn) {
+            if (aboutMenuBtn.querySelector('.red-dot')) return;
+            const redDot = document.createElement('span');
+            redDot.className = 'red-dot';
+            redDot.style.cssText = `
+                position: absolute;
+                right: 38px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 8px;
+                height: 8px;
+                background-color: #ff4444;
+                border-radius: 50%;
+                box-shadow: 0 0 4px rgba(255, 68, 68, 0.5);
+                z-index: 10;
+            `;
+            aboutMenuBtn.style.position = 'relative';
+            aboutMenuBtn.appendChild(redDot);
+        }
+        const navMeItem = Array.from(document.querySelectorAll('.nav-item')).find(item => 
+            item.getAttribute('data-target') === 'me-page'
+        );
+        if (navMeItem && !navMeItem.querySelector('.nav-red-dot')) {
+            const navRedDot = document.createElement('span');
+            navRedDot.className = 'nav-red-dot';
+            navRedDot.style.cssText = `
+                position: absolute;
+                right: 13px;
+                top: 4px;
+                width: 6px;
+                height: 6px;
+                background-color: #ff4444;
+                border-radius: 50%;
+                box-shadow: 0 0 4px rgba(255, 68, 68, 0.5);
+                z-index: 10;
+            `;
+            navMeItem.style.position = 'relative';
+            navMeItem.appendChild(navRedDot);
+        }
+    }
+
+    // ==================== 事件处理 ====================
+    function setupEventListeners() {
+        // 底部导航
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-target');
+                if (targetPage === 'home-page' || targetPage === 'me-page') {
+                    pageHistory = [];
+                }
+                showPage(targetPage);
+            });
+        });
+
+        // 主页按钮
+        homeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-target');
+                showPage(targetPage);
+            });
+        });
+
+        // 菜单按钮
+        menuButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetPage = this.getAttribute('data-target');
+                if (targetPage) showPage(targetPage);
+            });
+        });
+
+        // 返回按钮
+        backBtn.addEventListener('click', goBack);
+
+        // 主要功能按钮
+        sendMessageBtn.addEventListener('click', sendMessageFunction);
+        endMessageBtn.addEventListener('click', closeRemoteWindows);
+        sendCmdBtn.addEventListener('click', sendCmdCommand);
+
+        // 检查更新按钮
+        const checkUpdateBtn = document.getElementById('check-update-btn');
+        if (checkUpdateBtn) {
+            const newCheckUpdateBtn = checkUpdateBtn.cloneNode(true);
+            checkUpdateBtn.parentNode.replaceChild(newCheckUpdateBtn, checkUpdateBtn);
+
+            newCheckUpdateBtn.addEventListener('click', function() {
+                if (!navigator.onLine) {
+                    alert('网络连接失败，请检查网络设置后重试');
+                    return;
+                }
+
+                const originalText = this.textContent;
+                this.textContent = '检查中...';
+                this.disabled = true;
+
+                try {
+                    const result = Android.checkUpdate();
+                    const data = JSON.parse(result);
+
+                    this.textContent = originalText;
+                    this.disabled = false;
+
+                    if (!data.success) {
+                        alert('检查更新失败：' + (data.error || '未知错误'));
+                        return;
+                    }
+
+                    if (data.hasUpdate) {
+                        // ★★★ 手动检查到更新，立即显示红点 ★★★
+                        addRedDotToAboutMenu();
+                        const btn = document.getElementById('check-update-btn');
+                        if (btn) {
+                            btn.textContent = '有新版本';
+                        }
+
+                        if (data.isMajorUpdate === undefined && data.currentVersion && data.latestVersion) {
+                            const currentMajor = parseInt(data.currentVersion.split('.')[0]);
+                            const latestMajor = parseInt(data.latestVersion.split('.')[0]);
+                            data.isMajorUpdate = latestMajor > currentMajor;
+                        }
+                        showCustomUpdateDialog(data);
+                    } else {
+                        if (window.Android && typeof Android.showToast === 'function') {
+                            Android.showToast('当前已是最新版本');
+                        } else {
+                            alert('当前已是最新版本');
+                        }
+                    }
+                } catch (error) {
+                    this.textContent = originalText;
+                    this.disabled = false;
+                    alert('检查更新出错：' + error.message);
+                    console.error('更新检查失败:', error);
+                }
+            });
+        }
+
+        // 用户信息
+        userDetailsBtn.addEventListener('click', () => showPage('change-username-page'));
+
+        saveUsernameBtn.addEventListener('click', function() {
+            const newUsername = newUsernameInput.value.trim();
+
+            if (newUsername) {
+                FUsername = newUsername;
+                currentUsername.textContent = newUsername;
+                localStorage.setItem('username', newUsername);
+            } else {
+                localStorage.removeItem('username');
+                FUsername = '默认用户';
+                currentUsername.textContent = '默认用户';
+            }
+            newUsernameInput.value = '';
+            showPage('username-change-success');
+            setTimeout(() => redirectTo('me-page'), 3000);
+        });
+
+        // 提示词相关
+        keywordItems.forEach(item => {
+            if (!item.classList.contains('keyword-default')) {
+                item.addEventListener('click', function() {
+                    currentKeywordData = {
+                        keyword: this.getAttribute('data-keyword'),
+                        ip: this.getAttribute('data-ip')
+                    };
+                    keywordIpDisplay.textContent = currentKeywordData.ip;
+                    keywordNameDisplay.textContent = currentKeywordData.keyword;
+                    showPage('keyword-operation-page');
+                });
+            }
+        });
+
+        addKeywordBtn.addEventListener('click', function() {
+            newKeywordInput.value = '';
+            newKeywordIpInput.value = '';
+            showPage('add-keyword-page');
+        });
+
+        modifyKeywordBtn.addEventListener('click', function() {
+            modifiedKeywordInput.value = currentKeywordData.keyword;
+            showPage('modify-keyword-page');
+        });
+
+        saveModifiedKeywordBtn.addEventListener('click', function() {
+            const newKeyword = modifiedKeywordInput.value.trim();
+            if (newKeyword) {
+                if (newKeyword === '本地回环') {
+                    alert('不能使用保留提示词！');
+                    return;
+                }
+                if (FIPTips.has(newKeyword) && newKeyword !== currentKeywordData.keyword) {
+                    alert('该提示词已存在！');
+                    return;
+                }
+                FIPTips.delete(currentKeywordData.keyword);
+                currentKeywordData.keyword = newKeyword;
+
+                const keywordItem = document.querySelector(`[data-ip="${currentKeywordData.ip}"]`);
+                if (keywordItem) {
+                    keywordItem.setAttribute('data-keyword', newKeyword);
+                    keywordItem.querySelector('.keyword-title').textContent = newKeyword;
+                }
+
+                FIPTips.set(newKeyword, currentKeywordData.ip);
+                saveTipsConfig();
+                redirectTo('keyword-modify-success');
+                setTimeout(() => redirectTo('keywords-page'), 3000);
+            }
+        });
+
+        deleteKeywordBtn.addEventListener('click', function() {
+            const isConfirmed = confirm('确定要删除该提示词吗？');
+            if (isConfirmed) {
+                const keywordItem = document.querySelector(`[data-ip="${currentKeywordData.ip}"]`);
+                if (keywordItem) keywordItem.remove();
+                FIPTips.delete(currentKeywordData.keyword);
+                saveTipsConfig();
+                redirectTo('keywords-page');
+            }
+        });
+
+        saveNewKeywordBtn.addEventListener('click', function() {
+            const newKeyword = newKeywordInput.value.trim();
+            const newIp = newKeywordIpInput.value.trim();
+
+            if (!newKeyword) {
+                alert('提示词不能为空！');
+                return;
+            }
+            if (newKeyword === '本地回环') {
+                alert('不能使用保留提示词！');
+                return;
+            }
+            if (!newIp) {
+                alert('IP地址不能为空！');
+                return;
+            }
+            if (!isValidIPAddress(newIp)) {
+                alert('请输入有效的IPv4地址！');
+                return;
+            }
+            if (FIPTips.has(newKeyword)) {
+                alert('该提示词已存在！');
+                return;
+            }
+
+            FIPTips.set(newKeyword, newIp);
+            const success = saveTipsConfig();
+
+            if (success) {
+                const keywordList = document.querySelector('.keyword-list');
+                const newKeywordItem = createKeywordItem(newKeyword, newIp);
+                keywordList.appendChild(newKeywordItem);
+                redirectTo('keyword-add-success');
+            } else {
+                redirectTo('keyword-add-failure');
+            }
+            setTimeout(() => redirectTo('keywords-page'), 3000);
+        });
+    }
+
+    window.onNewVersionDetected = function(data) {
+        console.log('收到新版本通知:', data);
+        addRedDotToAboutMenu();
+        const checkUpdateBtn = document.getElementById('check-update-btn');
+        if (checkUpdateBtn) {
+            checkUpdateBtn.textContent = '有新版本';
+        }
+    };
+
+    // ==================== 安卓返回键处理 ====================
+    window.handleBackButton = function() {
+        const updateDialog = document.getElementById('custom-update-dialog');
+        if (updateDialog) {
+            const overlay = updateDialog.parentElement;
+            if (overlay && typeof overlay._closing !== 'undefined') {
+                const laterBtn = updateDialog.querySelector('.btn-later');
+                if (!laterBtn) {
+                    return true;
+                }
+                if (!overlay._closing) {
+                    overlay._closing = true;
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+                    updateDialog.style.opacity = '0';
+                    updateDialog.style.transform = 'scale(0.95)';
+                    setTimeout(() => overlay.remove(), 200);
+                }
+                return true;
+            }
+        }
+        const currentPage = document.querySelector('.page.active');
+        const currentPageId = currentPage ? currentPage.id : '';
+        if (temporaryPages.includes(currentPageId)) return true;
+        if (currentPageId === 'me-page') {
+            showPage('home-page');
+            return true;
+        }
+        if (currentPageId === 'home-page') {
+            if (window.Android && typeof Android.onBackButtonHandled === 'function') {
+                Android.onBackButtonHandled();
+            }
+            return false;
+        }
+        goBack();
+        return true;
+    };
+
+    window.androidBackButtonDefault = function() {
+        const updateDialog = document.getElementById('custom-update-dialog');
+        if (updateDialog) {
+            const overlay = updateDialog.parentElement;
+            if (overlay && typeof overlay._closing !== 'undefined') {
+                if (!overlay._closing) {
+                    overlay._closing = true;
+                    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+                    updateDialog.style.opacity = '0';
+                    updateDialog.style.transform = 'scale(0.95)';
+                    setTimeout(() => overlay.remove(), 200);
+                }
+                return true;
+            }
+        }
+        const currentPage = document.querySelector('.page.active');
+        const currentPageId = currentPage ? currentPage.id : '';
+        if (temporaryPages.includes(currentPageId)) return true;
+        if (currentPageId === 'me-page') {
+            showPage('home-page');
+            return true;
+        }
+        if (currentPageId === 'home-page') {
+            if (window.Android && typeof Android.onBackButtonHandled === 'function') {
+                Android.onBackButtonHandled();
+            }
+            return false;
+        }
+        goBack();
+        return true;
+    };
+
+    // ==================== 初始化 ====================
+    function initialize() {
+        if (!document.body.classList.contains('theme-initialized')) {
+            document.body.classList.add('theme-initialized');
+        }
+
+        setupEventListeners();
+        initThemeMode();
+        loadData();
+        showPage('home-page');
+        initIPDisplay();
+
+        setTimeout(async () => {
+            await checkAndUpdateIP();
+        }, 1000);
+    }
+
+    // 防止 Android 接口不存在时报错
+    if (!window.Android) {
+        window.Android = {
+            checkUpdate: function() {
+                return JSON.stringify({
+                    success: false,
+                    error: 'Android接口不可用'
+                });
+            },
+            downloadWithBrowser: function(url) {
+                window.open(url, '_blank');
+            },
+            downloadApkSilent: function(url) {
+                console.log('静默下载功能不可用，使用浏览器打开');
+                window.open(url, '_blank');
+            },
+            getSystemTheme: function() {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            },
+            setThemeMode: function(theme) {},
+            sendUdpMessage: function() { return 'ERROR: 接口不可用'; },
+            getLocalIP: function() { return '未知'; },
+            getAndCheckLocalIP: function() { return 'ERROR: 接口不可用'; },
+            onBackButtonHandled: function() {},
+            openUrl: function(url) { window.open(url, '_blank'); },
+            showToast: function(msg) { alert(msg); }
+        };
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', initialize);
+})();
+</script>
+</body>
+</html>

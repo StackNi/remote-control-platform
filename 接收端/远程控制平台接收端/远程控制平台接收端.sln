@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+# SharpDevelop 5.1
+VisualStudioVersion = 12.0.20827.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "远程控制平台接收端", "远程控制平台接收端\远程控制平台接收端.csproj", "{CA07769C-B02A-4A90-A7F6-91F750CCBF77}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA07769C-B02A-4A90-A7F6-91F750CCBF77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA07769C-B02A-4A90-A7F6-91F750CCBF77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA07769C-B02A-4A90-A7F6-91F750CCBF77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA07769C-B02A-4A90-A7F6-91F750CCBF77}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

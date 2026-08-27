@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="theme-dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>远程控制平台 - 你的局域网通信与管理助手</title>
+    
+    <link rel="icon" href="/remote-control-platform/send.ico">
+    <link rel="alternate icon" href="/remote-control-platform/favicon.ico">
+    
+    <script>
+        (function() {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.className = 'theme-' + theme;
+        })();
+    </script>
+    
+    <style>
+        /* ===== 暗色模式 ===== */
+        .theme-dark {
+            --bg: #0d1117;
+            --bg-card: #161b22;
+            --bg-hover: #1c2333;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --border: #30363d;
+            --border-light: #424a53;
+            --shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+
+        /* ===== 明亮模式 ===== */
+        .theme-light {
+            --bg: #f6f8fa;
+            --bg-card: #ffffff;
+            --bg-hover: #f0f2f5;
+            --text: #1f2328;
+            --text-muted: #656d76;
+            --border: #d0d7de;
+            --border-light: #b9c1cc;
+            --shadow: 0 8px 24px rgba(0,0,0,0.05);
+        }
+
+        :root {
+            --purple: #a855f7;
+            --red: #f87171;
+            --blue: #60a5fa;
+            --purple-bg: rgba(168, 85, 247, 0.15);
+            --red-bg: rgba(248, 113, 113, 0.15);
+            --blue-bg: rgba(96, 165, 250, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* ===== 导航栏：分割线去掉，按钮在右上 ===== */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 16px;
+            margin-bottom: 40px;
+            /* border-bottom: none; 已去掉 */
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .site-icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .site-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            display: flex;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 4px;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .theme-btn {
+            padding: 6px 16px;
+            border-radius: 32px;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-btn.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .header {
+            margin-bottom: 48px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 44px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 600px;
+        }
+
+        /* ===== 三图标：小屏幕强制横向 ===== */
+        .logo-showcase {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 48px;
+            margin: 48px 0 56px;
+            flex-wrap: nowrap;
+        }
+
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 16px;
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-label {
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .purple { color: var(--purple); }
+        .red    { color: var(--red); }
+        .blue   { color: var(--blue); }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .download-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--text);
+            color: var(--bg);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--text-muted);
+        }
+
+        .install-note {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .feature-item {
+            padding: 18px 20px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .feature-item:hover {
+            border-color: var(--text-muted);
+            transform: translateY(-2px);
+        }
+
+        .feature-item h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .feature-item p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .author-section {
+            margin-top: 60px;
+            padding: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: background 0.25s, border-color 0.25s;
+        }
+
+        .author-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .author-desc {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 16px;
+        }
+
+        .author-links {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .author-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .author-links a:hover {
+            opacity: 0.7;
+            text-decoration: underline;
+        }
+
+        footer {
+            margin-top: 48px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        footer p + p {
+            margin-top: 8px;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .navbar {
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .theme-toggle {
+                align-self: center;
+            }
+
+            .title {
+                font-size: 30px;
+            }
+
+            .logo-showcase {
+                gap: 16px;
+            }
+
+            .logo-container {
+                width: 60px;
+                height: 60px;
+                padding: 10px;
+            }
+
+            .logo-label {
+                font-size: 12px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .download-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-showcase {
+                gap: 12px;
+            }
+
+            .logo-container {
+                width: 52px;
+                height: 52px;
+                padding: 8px;
+            }
+
+            .logo-label {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ===== 导航栏：分割线已去掉 ===== -->
+        <div class="navbar">
+            <div class="logo-area">
+                <img src="/remote-control-platform/send.svg" alt="Remote Control" class="site-icon" onerror="this.style.display='none'; this.nextElementSibling.style.marginLeft=0;">
+                <span class="site-title">远程控制平台</span>
+            </div>
+            <div class="theme-toggle">
+                <button class="theme-btn" data-theme="dark">暗黑</button>
+                <button class="theme-btn" data-theme="light">明亮</button>
+            </div>
+        </div>
+
+        <div class="header">
+            <span class="badge">v3.2.0</span>
+            <h1 class="title">局域网通信与控制工具</h1>
+            <p class="subtitle">专为教室、机房环境设计，解决局域网内快速传达信息与远程控制的需求</p>
+        </div>
+
+        <!-- ===== 三图标：小屏幕强制横向 ===== -->
+        <div class="logo-showcase">
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-purple.png" alt="手机发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--purple-bg)';">
+                </div>
+                <span class="logo-label purple">📱 手机发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-red.png" alt="电脑发送端" onerror="this.style.display='none'; this.parentElement.style.background='var(--red-bg)';">
+                </div>
+                <span class="logo-label red">💻 电脑发送端</span>
+            </div>
+            <div class="logo-item">
+                <div class="logo-container">
+                    <img src="/remote-control-platform/logo-blue.png" alt="Windows接收端" onerror="this.style.display='none'; this.parentElement.style.background='var(--blue-bg)';">
+                </div>
+                <span class="logo-label blue">🖥️ Windows接收端</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📦 下载</h2>
+            <div class="download-section">
+                <a href="/remote-control-platform/remotecontrol_3.2.0.exe" class="btn btn-primary">Windows 版安装包</a>
+                <a href="/remote-control-platform/remotecontrol_3.2.0.apk" class="btn btn-secondary">Android 版</a>
+            </div>
+            <div class="install-note">
+                Windows安装包包含：发送端 + 接收端 + 命令执行端
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>✨ v3.2.0 功能</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>📢 大屏消息</h4>
+                    <p>局域网发送全屏通知</p>
+                </div>
+                <div class="feature-item">
+                    <h4>⚡ 远程CMD</h4>
+                    <p>远程执行命令行指令</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎨 淡入淡出</h4>
+                    <p>动画效果+新显示模式</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🎯 智能IP提示</h4>
+                    <p>适用于固定IP台式机</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 使用说明</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h4>🌐 同一局域网</h4>
+                    <p>双方设备需在同一网络</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🖥️ 接收端</h4>
+                    <p>仅支持Windows系统</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📍 固定IP</h4>
+                    <p>建议目标机有固定IP</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="author-section">
+            <div class="author-name">StackNi</div>
+            <div class="author-desc">高三课余时间开发</div>
+            <div class="author-links">
+                <a href="https://github.com/StackNi">GitHub</a>
+                <a href="https://github.com/StackNi/remote-control-platform">项目地址</a>
+            </div>
+        </div>
+
+        <footer>
+            <p>开源协议 · Apache License 2.0</p>
+            <p>© 2026 StackNi · 远程控制平台</p>
+        </footer>
+    </div>
+
+    <script>
+        (function() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.documentElement.className = 'theme-' + saved;
+
+            const btns = document.querySelectorAll('.theme-btn');
+            btns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === saved);
+            });
+
+            btns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const theme = this.dataset.theme;
+                    document.documentElement.className = 'theme-' + theme;
+                    localStorage.setItem('theme', theme);
+                    btns.forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+                });
+            });
+
+            document.querySelectorAll('.logo-container img').forEach(img => {
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const p = this.parentElement;
+                    const alt = this.alt;
+                    if (alt.includes('手机')) p.style.background = 'var(--purple-bg)';
+                    else if (alt.includes('电脑')) p.style.background = 'var(--red-bg)';
+                    else if (alt.includes('接收端')) p.style.background = 'var(--blue-bg)';
+                    p.style.borderRadius = '20px';
+                };
+            });
+        })();
+    </script>
+</body>
+</html>

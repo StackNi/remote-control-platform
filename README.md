@@ -1,5 +1,5 @@
 
-<img width="1256" height="749" alt="image" src="https://stackni.github.io/remote-control-platform/sample.png" />
+<img width="1256" height="749" alt="image" src="https://github.com/user-attachments/assets/e0911ba5-d53a-421c-a607-3ff602bf912a" />
 <div align="center">
   <h1>
     <a  target="_blank" style="text-decoration: none; color: inherit;">remote-control-platform</a>

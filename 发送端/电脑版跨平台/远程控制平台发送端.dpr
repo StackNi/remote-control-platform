@@ -1,9 +1,9 @@
-﻿program 远程控制平台发送端;
+program 远程控制平台发送端;
 
 uses
   System.SysUtils,
   System.IOUtils,
-  System.IniFiles,
+  System.JSON,
   FMX.Forms,
   远程控制平台发送端带界面 in '远程控制平台发送端带界面.pas' {mainform},
   FMX.Skia,
@@ -40,21 +40,34 @@ begin
   if not TDirectory.Exists(Result) then
     TDirectory.CreateDirectory(Result);
     
-  Result := TPath.Combine(Result, 'config.ini');
+  Result := TPath.Combine(Result, 'config.json');
 end;
 
 function LoadSkiaSetting: Boolean;
 var
-  Ini: TIniFile;
+  ConfigPath: string;
+  JSON: TJSONObject;
+  Value: string;
 begin
-  if not TFile.Exists(GetAppConfigPath) then
-    Exit(True); // 默认启用Skia
+  Result := True; // 默认启用Skia
+  ConfigPath := GetAppConfigPath;
+  
+  if not TFile.Exists(ConfigPath) then
+    Exit;
 
-  Ini := TIniFile.Create(GetAppConfigPath);
   try
-    Result := Ini.ReadBool('Graphics', 'SkiaEnabled', True);
-  finally
-    Ini.Free;
+    JSON := TJSONObject.ParseJSONValue(TFile.ReadAllText(ConfigPath)) as TJSONObject;
+    if JSON = nil then
+      Exit;
+    try
+      if JSON.TryGetValue<string>('Graphics.SkiaEnabled', Value) then
+        Result := StrToBoolDef(Value, True);
+    finally
+      JSON.Free;
+    end;
+  except
+    // JSON 损坏时用默认值
+    Result := True;
   end;
 end;
 

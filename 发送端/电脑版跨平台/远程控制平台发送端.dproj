@@ -191,12 +191,13 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_MajorVer>3</VerInfo_MajorVer>
         <VerInfo_MinorVer>2</VerInfo_MinorVer>
-        <VerInfo_Keys>CompanyName=StackNi;FileDescription=远程控制平台发送端;FileVersion=3.2.0.0;InternalName=sender.exe;LegalCopyright=Copyright © StackNi. All rights reserved.;LegalTrademarks=;OriginalFilename=sender.exe;ProgramID=;ProductName=远程控制平台;ProductVersion=3.2.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=StackNi;FileDescription=远程控制平台发送端;FileVersion=3.2.1.0;InternalName=sender.exe;LegalCopyright=Copyright © StackNi. All rights reserved.;LegalTrademarks=;OriginalFilename=sender.exe;ProgramID=;ProductName=远程控制平台;ProductVersion=3.2.1;Comments=</VerInfo_Keys>
         <Icon_MainIcon>send.ico</Icon_MainIcon>
         <Icns_MainIcns>send.icns</Icns_MainIcns>
         <UWP_DelphiLogo44>..\..\DotNET\远程控制平台\send.png</UWP_DelphiLogo44>
         <UWP_DelphiLogo150>..\..\DotNET\远程控制平台\send.png</UWP_DelphiLogo150>
         <Debugger_HostApplication>C:\360\Delphi\远程控制平台发送端带界面\Win32\Release\远程控制平台发送端.exe</Debugger_HostApplication>
+        <VerInfo_Release>1</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>

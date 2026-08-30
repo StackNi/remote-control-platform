@@ -1,6 +1,6 @@
 ; 汉化：MonKeyDu 
 #define MyAppName "远程控制平台"
-#define MyAppVersion "3.2.0"
+#define MyAppVersion "3.2.1"
 #define MyAppPublisher "StackNi"
 #define MyAppExeName "sender.exe"
 

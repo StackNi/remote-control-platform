@@ -2,9 +2,9 @@
     "android_version": "3.2.0",
     "windows_version":"3.2.0",
     "android_notes": "更新了通信协议，修复了一些已知问题",
-    "windows_notes": "更新了通信协议，修复了一些已知问题",
+    "windows_notes": "修复 Skia 设置无法持久化保存的问题",
     "android": "https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.apk",
-    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.exe",
+    "windows": "https://stackni.github.io/remote-control-platform/remotecontrol_3.2.1.exe",
     "android_date": "2026-08-27",
-    "windows_date": "2026-08-23"
+    "windows_date": "2026-08-30"
 }

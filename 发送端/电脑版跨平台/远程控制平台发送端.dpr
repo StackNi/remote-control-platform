@@ -1,4 +1,4 @@
-program 远程控制平台发送端;
+﻿program 远程控制平台发送端;
 
 uses
   System.SysUtils,

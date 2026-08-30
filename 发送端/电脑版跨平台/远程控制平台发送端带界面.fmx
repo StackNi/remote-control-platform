@@ -1398,7 +1398,7 @@ object mainform: Tmainform
         TextSettings.Font.Size = 15.000000000000000000
         TextSettings.FontColor = claSilver
         TextSettings.HorzAlign = Trailing
-        Text = #29256#26412#65306'3.2.0   '#20316#32773#65306'StackNi'
+        Text = #29256#26412#65306'3.2.1   '#20316#32773#65306'StackNi'
         TabOrder = 1
       end
       object homelistpopupparent: TLayout
@@ -5079,7 +5079,7 @@ object mainform: Tmainform
         TextSettings.Font.Family = 'Microsoft YaHei'
         TextSettings.Font.Size = 16.000000000000000000
         TextSettings.FontColor = xFFCCCCCC
-        Text = #29256#26412#65306'3.2.0'
+        Text = #29256#26412#65306'3.2.1'
         TabOrder = 2
       end
       object appname: TLabel

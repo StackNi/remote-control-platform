@@ -1,6 +1,6 @@
 {
     "android_version": "3.2.0",
-    "windows_version":"3.2.0",
+    "windows_version":"3.2.1",
     "android_notes": "更新了通信协议，修复了一些已知问题",
     "windows_notes": "修复 Skia 设置无法持久化保存的问题",
     "android": "https://stackni.github.io/remote-control-platform/remotecontrol_3.2.0.apk",
